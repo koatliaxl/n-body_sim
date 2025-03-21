@@ -1,0 +1,23 @@
+[package]
+name = "n-body_sim"
+version = "0.0.1"
+edition = "2018"
+build = "gl/build.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+gl_generator = "0.14.0"
+
+[dependencies]
+#glutin = "0.24.1"
+#winit = "0.19.2"
+
+[dependencies.glfw]
+#git = "https://github.com/bjz/glfw-rs.git"
+version = "0.45.0"
+default-features = false
+
+[dependencies.mat_vec]
+git = "https://github.com/koatliaxl/mat_vec.git"
+branch = "main"
