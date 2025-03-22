@@ -8,13 +8,17 @@ use std::sync::mpsc::Receiver;
 use crate::gl_data::GlData;
 use crate::world::init_world;
 use draw::draw;
-use glfw::WindowEvent::{CursorPos, Scroll, Size};
-use glfw::{Action, Context, Key, MouseButton, Window, WindowEvent};
+use glfw::MouseButton::Button1 as LeftButton;
+use glfw::WindowEvent::{CursorPos, MouseButton /* as MousePress*/, Scroll, Size};
+use glfw::{Action, Context, Key, Window, WindowEvent};
 use handle_input::*;
 use n_body_sim::gl;
 use sim::*;
+use state_and_cfg::RunState::{Run, Stop};
 use state_and_cfg::*;
 use std::time::Instant;
+use glfw::Action::Release;
+use crate::RunState::Pause;
 
 mod draw;
 mod gl_data;
@@ -44,29 +48,38 @@ fn main() {
     view_pos_changed(&gl_data, &mut state, window.get_size());
     view_scale_changed(&gl_data, &state, window.get_size());
 
-    let mut tic_processed = false;
+    //let mut tic_processed = false;
     let mut tic_duration = 0.0;
+    //let mut update_processed = false;
+    //let mut new_frame = true;
+    let mut last_frame_time = Instant::now();
+    let mut between_frames = 0.0;
     while !window.should_close() {
-        let elapsed = state.tic_start_time.elapsed();
-        if state.ups_changed {
-            tic_duration = 1000.0 / state.ups as f64;
-            state.ups_changed = false;
+        if state.fps_changed {
+            between_frames = 1000.0 / state.fps as f64;
         }
-        if elapsed.as_secs_f64() * 1000.0 >= tic_duration {
-            state.tic_start_time = Instant::now();
-            tic_processed = false;
-        }
-        if !tic_processed {
-            //apply commands()
-            process_step(&mut world, tic_duration / 1000.0);
+        let since_last_frame = last_frame_time.elapsed();
+        if since_last_frame.as_secs_f64() * 1000.0 >= between_frames || state.run_state != Stop {
             unsafe {
                 draw(&gl_data, &world, &state);
             }
             window.swap_buffers();
-            glfw.poll_events();
-            tic_processed = true;
-            handle_events(&mut window, &events, &mut state, &gl_data);
+            last_frame_time = Instant::now();
+            //new_frame = false;
         }
+        if state.ups_changed {
+            tic_duration = 1000.0 / state.ups as f64;
+            state.ups_changed = false;
+        }
+        let since_last_upd = state.last_upd_time.elapsed();
+        if since_last_upd.as_secs_f64() * 1000.0 >= tic_duration && state.run_state == Run {
+            process_step(&mut world, tic_duration / 1000.0);
+            state.last_upd_time = Instant::now();
+            //tic_processed = false;
+        }
+        glfw.poll_events();
+        handle_events(&mut window, &events, &mut state, &gl_data);
+        //apply commands()
     }
 }
 
@@ -82,15 +95,12 @@ fn handle_events(
     for (_, event) in glfw::flush_messages(&events) {
         match event {
             Size(w, h) => unsafe { gl::Viewport(0, 0, w, h) },
-            WindowEvent::MouseButton(button, action, _) => {
-                if button == MouseButton::Button1 && action == Action::Press {
+            MouseButton(button, action, _) => {
+                if button == LeftButton && action == Action::Press {
                     state.left_mouse_bt_was_pressed = true;
                     state.cursor_pos_when_press = state.last_cursor_pos;
                 }
-                if button == MouseButton::Button1 && action == Action::Release {
-                    /*if state.left_mouse_bt_was_pressed {
-                        view_pos_changed(&gl_data, state, window.get_size())
-                    }*/
+                if button == LeftButton && action == Action::Release {
                     state.left_mouse_bt_was_pressed = false;
                     state.view_pos = state.new_view_pos;
                 }
@@ -104,6 +114,17 @@ fn handle_events(
             Scroll(_, s) => {
                 state.view_scale -= s as f32 * 0.9;
                 view_scale_changed(&gl_data, &state, window.get_size())
+            }
+            WindowEvent::Key(key, _, action, _modifiers) => match key {
+                Key::P | Key::Pause if action == Action::Release => {
+                    println!("key 'P' pressed");
+                    match state.run_state  {
+                        Run => state.run_state = Pause,
+                        Pause => state.run_state = Run,
+                        Stop => state.run_state = Pause
+                    }
+                }
+                _ => (),
             }
             _ => (),
         }
