@@ -1,42 +1,65 @@
-use crate::{GlData, State};
-use mat_vec::{Matrix4x4, Vector3};
+use crate::gl_data::GlData;
+use crate::state_and_cfg::RunState::*;
+use crate::state_and_cfg::*;
+use crate::Msg;
+use glfw::Action::Release;
+use glfw::MouseButton::Button1 as LeftButton;
+use glfw::WindowEvent::{CursorPos, MouseButton /* as MousePress*/, Scroll, Size};
+use glfw::{Action, Key, Window, WindowEvent};
 use n_body_sim::gl;
+use std::sync::mpsc::Receiver;
 
-pub fn view_pos_changed(gl_res: &GlData, state: &mut State, window_size: (i32, i32)) {
-    //let last_vec = Vector3::from_tuple(state.last_cursor_pos); //todo: Vector3 from tuple-2 ("as Vector2")
-    let (x, y) = state.last_cursor_pos;
-    let last_vec = Vector3::new(x, y, 0.0);
-    let (px, py) = state.cursor_pos_when_press;
-    let press_vec = Vector3::new(px, py, 0.0);
-    let (dx, dy, _) = (press_vec - last_vec).get_components();
-    let (w, h) = window_size;
-    let ratio = (dx as f32 / w as f32, dy as f32 / h as f32);
-    state.new_view_pos = state.view_pos + Vector3::new(ratio.0, -ratio.1, 0.0) * state.view_scale;
+pub use view::*;
 
-    let view_mat = Matrix4x4::<f32>::new_LookAt_matrix(
-        state.new_view_pos,
-        Vector3::new(0.0, 0.0, -1.0),
-        Vector3::new(0.0, 1.0, 0.0),
-    );
-    unsafe {
-        let shader = gl_res.get_shader_gl_id("Object shader");
-        gl::UseProgram(shader);
-        gl_res.set_uniform_mat4x4("view_mat", "Object shader", &view_mat);
+pub mod view;
+
+pub fn handle_events(
+    window: &mut Window,
+    events: &Receiver<(f64, WindowEvent)>,
+    state: &mut State,
+    gl_data: &GlData,
+) {
+    if window.get_key(Key::Escape) == Action::Press {
+        window.set_should_close(true);
+        for snd in &state.to_workers {
+            snd.send(Msg::Exit);
+        }
     }
-}
-
-pub fn view_scale_changed(gl_res: &GlData, state: &State, window_size: (i32, i32)) {
-    let (w, h) = (window_size.0 as f32, window_size.1 as f32);
-    let ratio = w / h;
-    let proj_mat = Matrix4x4::<f32>::new_orthographic_projection(
-        state.view_scale * ratio,
-        state.view_scale,
-        10.0,
-        0.1,
-    );
-    unsafe {
-        let shader = gl_res.get_shader_gl_id("Object shader");
-        gl::UseProgram(shader);
-        gl_res.set_uniform_mat4x4("proj_mat", "Object shader", &proj_mat);
+    for (_, event) in glfw::flush_messages(&events) {
+        match event {
+            Size(w, h) => unsafe { gl::Viewport(0, 0, w, h) },
+            MouseButton(button, action, _) => {
+                if button == LeftButton && action == Action::Press {
+                    state.left_mouse_bt_was_pressed = true;
+                    state.cursor_pos_when_press = state.last_cursor_pos;
+                }
+                if button == LeftButton && action == Action::Release {
+                    state.left_mouse_bt_was_pressed = false;
+                    state.view_pos = state.new_view_pos;
+                }
+            }
+            CursorPos(x, y) => {
+                state.last_cursor_pos = (x, y);
+                if state.left_mouse_bt_was_pressed {
+                    view_pos_changed(&gl_data, state, window.get_size())
+                }
+            }
+            Scroll(_, s) => {
+                state.view_scale -= s as f32 * 0.9;
+                view_scale_changed(&gl_data, &state, window.get_size())
+            }
+            WindowEvent::Key(key, _, action, _modifiers) => match key {
+                Key::P | Key::Pause if action == Action::Release => {
+                    println!("key 'P' pressed");
+                    match state.run_state {
+                        Run => state.run_state = Pause,
+                        Pause => state.run_state = Run,
+                        Stop => state.run_state = Pause,
+                    }
+                }
+                _ => (),
+            },
+            _ => (),
+        }
     }
 }

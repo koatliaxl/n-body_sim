@@ -21,3 +21,6 @@ default-features = false
 [dependencies.mat_vec]
 git = "https://github.com/koatliaxl/mat_vec.git"
 branch = "main"
+
+[profile.dev]
+#incremental = false
