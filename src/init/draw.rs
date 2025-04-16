@@ -1,3 +1,4 @@
+use crate::draw::BODY_GFX_RAD;
 use crate::gl;
 use crate::GlData;
 use n_body_sim::SIZE_OF_GL_FLOAT;
@@ -19,8 +20,8 @@ pub unsafe fn init_draw(gl_data: &mut GlData) {
     for ang in 0..16 {
         let sin = (2.0 * PI / 16.0 * ang as f32).sin();
         let cos = (2.0 * PI / 16.0 * ang as f32).cos();
-        vertices[ang * 2] = 0.4 * sin;
-        vertices[ang * 2 + 1] = 0.4 * cos;
+        vertices[ang * 2] = BODY_GFX_RAD * sin;
+        vertices[ang * 2 + 1] = BODY_GFX_RAD * cos;
     }
     let position_attrib_len = 2;
 

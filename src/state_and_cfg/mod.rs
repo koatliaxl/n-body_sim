@@ -1,5 +1,7 @@
 use crate::{compute_in_parallel, Msg, ObjBuffer};
 use mat_vec::Vector3;
+use n_body_sim::ObjectType;
+use std::collections::VecDeque;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
@@ -32,7 +34,28 @@ pub struct State {
     pub from_workers: Receiver<Msg>,
     pub received: usize,
     pub workers: Vec<JoinHandle<()>>,
+    pub selected: i64,
+    pub new_obj_mass: f64,
+    pub command_queue: VecDeque<Command>,
 }
+
+pub enum Command {
+    Create {
+        pos: Vector3<f64>,
+        vel: Vector3<f64>,
+        mass: f64,
+        class: ObjectType,
+    },
+    Delete {
+        id: u64,
+    },
+}
+
+/*struct ThreadConfig {
+    pub receiver: Receiver<Msg>,
+    pub sender: Sender<Msg>,
+    pub id: usize,
+}*/
 
 impl State {
     pub fn new(/*number_of_threads: u32*/ data_mirrors: &Vec<Arc<Mutex<ObjBuffer>>>) -> State {
@@ -68,6 +91,13 @@ impl State {
             from_workers,
             received: 0,
             workers: jh_vec,
+            selected: -1,
+            new_obj_mass: 1.0,
+            command_queue: VecDeque::new(),
         }
     }
 }
+
+/*struct Config {
+
+}*/

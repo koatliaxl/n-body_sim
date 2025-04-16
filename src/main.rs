@@ -54,6 +54,7 @@ fn main() {
     while !window.should_close() {
         if state.fps_changed {
             between_frames = 1000.0 / state.fps as f64;
+            state.fps_changed = false;
         }
         let since_last_frame = last_frame_time.elapsed();
         if since_last_frame.as_secs_f64() * 1000.0 >= between_frames || state.run_state != Stop {
@@ -83,16 +84,13 @@ fn main() {
             update_processed = true;
             state.received = 0
         }
-
         glfw.poll_events();
-        handle_events(&mut window, &events, &mut state, &gl_data);
-        //apply commands()
+        handle_events(&mut window, &events, &mut state, &gl_data, &world);
+        if update_processed {
+            apply_commands(&mut world, &mut state)
+        }
     }
     for jh in state.workers {
         jh.join();
     }
 }
-
-/*fn init_workers(state: &mut State, number_of_threads: u32) {
-
-}*/

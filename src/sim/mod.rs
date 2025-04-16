@@ -1,10 +1,14 @@
-use crate::{Msg, State};
+use crate::{Command, Msg, State};
 use mat_vec::Vector3;
-use n_body_sim::split_task_length;
-use n_body_sim::Object;
 use n_body_sim::ObjectType::*;
+use n_body_sim::{split_task_length, ObjectIdTable};
+use n_body_sim::{Object, ID_TABLE};
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
+
+static mut OBJECT_ID_TABLE: ObjectIdTable = ObjectIdTable::new();
+
+pub mod parallel;
 
 pub struct World {
     pub objects: Vec<Object>,
@@ -60,10 +64,41 @@ pub fn update_world(world: &mut World) {
             } = *guard;
             for j in 0..task {
                 world.objects[i + j] = objects[i + j].clone();
-                i += 1
             }
+            i += task
         } else {
             eprintln!("main: lock not acquired")
+        }
+    }
+}
+
+pub fn apply_commands(world: &mut World, state: &mut State) {
+    while state.command_queue.len() > 0 {
+        if let Some(command) = state.command_queue.pop_back() {
+            match command {
+                Command::Create {
+                    pos,
+                    vel,
+                    mass,
+                    class,
+                } => {
+                    let body = Object::new_by_vec3(pos, vel, mass, class);
+                    world.objects.push(body);
+                }
+                Command::Delete { id } => {
+                    let mut to_delete = 0;
+                    for i in 0..world.objects.len() {
+                        let body = &world.objects[i];
+                        if body.get_id() == id {
+                            //world.objects.swap_remove(i);
+                            to_delete = i;
+                            unsafe { ID_TABLE.release_id(id) }
+                            break;
+                        }
+                    }
+                    world.objects.swap_remove(to_delete);
+                }
+            }
         }
     }
 }

@@ -2,7 +2,11 @@ extern crate core;
 
 use mat_vec::Vector3;
 
+pub use support::id_table::ObjectIdTable;
+
 pub const SIZE_OF_GL_FLOAT: isize = std::mem::size_of::<gl::types::GLfloat>() as isize;
+
+pub static mut ID_TABLE: ObjectIdTable = ObjectIdTable::new();
 
 pub mod gl {
     include!("../gl/bindings.rs");
@@ -10,12 +14,16 @@ pub mod gl {
 
 #[cfg(test)]
 mod tests;
+pub mod support {
+    pub mod id_table;
+}
 
 pub struct Object {
     pub pos: Vector3<f64>,
     pub vel: Vector3<f64>,
     pub mass: f64,
     pub class: ObjectType,
+    id: u64,
 }
 
 #[derive(PartialEq, Copy, Clone)]
@@ -25,6 +33,40 @@ pub enum ObjectType {
     Light,
 }
 
+impl Object {
+    pub fn new(x: f64, y: f64, vx: f64, vy: f64, mass: f64) -> Object {
+        unsafe {
+            Object {
+                pos: Vector3::new(x, y, 0.0),
+                vel: Vector3::new(vx, vy, 0.0),
+                mass,
+                class: ObjectType::Massive,
+                id: ID_TABLE.take_new_id(),
+            }
+        }
+    }
+
+    pub fn new_by_vec3(
+        pos: Vector3<f64>,
+        vel: Vector3<f64>,
+        mass: f64,
+        class: ObjectType,
+    ) -> Object {
+        let id = unsafe { ID_TABLE.take_new_id() };
+        Object {
+            pos,
+            vel,
+            mass,
+            class,
+            id,
+        }
+    }
+
+    pub fn get_id(&self) -> u64 {
+        self.id
+    }
+}
+
 impl Clone for Object {
     fn clone(&self) -> Self {
         Object {
@@ -32,6 +74,7 @@ impl Clone for Object {
             vel: self.vel,
             mass: self.mass,
             class: self.class,
+            id: self.id,
         }
     }
 }

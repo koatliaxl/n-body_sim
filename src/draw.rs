@@ -3,6 +3,8 @@ use crate::{State, World};
 use mat_vec::{Matrix4x4, Vector3};
 use n_body_sim::gl;
 
+pub static BODY_GFX_RAD: f32 = 0.4;
+
 pub unsafe fn draw(gl_res: &GlData, world: &World, _state: &State) {
     gl::ClearColor(0.2, 0.1, 0.5, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
@@ -16,25 +18,15 @@ pub unsafe fn draw(gl_res: &GlData, world: &World, _state: &State) {
     gl::PointSize(3.0);
 
     for obj in &world.objects {
-        let (x, y, z) = obj.pos.get_components(); //no conversions yet
-        let pos = Vector3::new(x as f32, y as f32, z as f32);
+        let (x, y, _) = obj.pos.get_components(); //no conversions yet
+        let pos = Vector3::new(x as f32, y as f32, 0.0);
         let model_mat = Matrix4x4::new_translation_from_vec(pos);
         gl_res.set_uniform_mat4x4("model_mat", "Object shader", &model_mat);
         //gl::DrawArrays(gl::POINTS, 0, 16);
-        gl::DrawArrays(gl::LINE_LOOP, 0, 16);
+        if obj.get_id() == _state.selected as u64 {
+            gl::DrawArrays(gl::LINES, 0, 16);
+        } else {
+            gl::DrawArrays(gl::LINE_LOOP, 0, 16);
+        }
     }
-
-    /*let mut model_mat = Matrix4x4::new_translation(0.2, 0.2, 0.0);
-    gl_res.set_uniform_mat4x4("model_mat", "Object shader", &model_mat);
-    gl::DrawArrays(gl::POINTS, 0, 16);
-
-    model_mat.set(0, 3, -0.5);
-    model_mat.set(1, 3, 0.5);
-    gl_res.set_uniform_mat4x4("model_mat", "Object shader", &model_mat);
-    gl::DrawArrays(gl::LINE_STRIP, 0, 16);
-
-    model_mat.set(0, 3, -0.5);
-    model_mat.set(1, 3, -0.5);
-    gl_res.set_uniform_mat4x4("model_mat", "Object shader", &model_mat);
-    gl::DrawArrays(gl::LINES, 0, 16);*/
 }

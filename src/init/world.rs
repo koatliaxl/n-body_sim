@@ -5,24 +5,9 @@ use std::sync::{Arc, Mutex};
 
 pub fn init_world(number_threads: usize) -> World {
     let objects = vec![
-        Object {
-            pos: Vector3::new(3.5, 3.5, 0.0),
-            vel: Vector3::new(1.8, -1.8, 0.0),
-            mass: 1.0,
-            class: Massive,
-        },
-        Object {
-            pos: Vector3::new(0.0, 0.0, 0.0),
-            vel: Vector3::new(0.0, 0.0, 0.0),
-            mass: 50.0,
-            class: Massive,
-        },
-        Object {
-            pos: Vector3::new(-8.0, -8.0, 0.0),
-            vel: Vector3::new(-1.0, 1.0, 0.0),
-            mass: 2.0,
-            class: Massive,
-        },
+        Object::new(3.5, 3.5, 1.8, -1.8, 1.0),
+        Object::new(0.0, 0.0, 0.0, 0.0, 50.0),
+        Object::new(-8.0, -8.0, -1.0, 1.0, 2.0),
     ];
     let forces = vec![Vector3::new(0.0, 0.0, 0.0); objects.len()];
     /*let obj_bufs = vec![
