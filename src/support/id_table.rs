@@ -2,14 +2,14 @@ use std::ops::Range;
 
 pub struct ObjectIdTable {
     ids: Vec<Range<u64>>,
-    first_free_id: usize,
+    //first_free_id: usize,
 }
 
 impl ObjectIdTable {
     pub const fn new() -> ObjectIdTable {
         ObjectIdTable {
             ids: Vec::new(),
-            first_free_id: 0,
+            //first_free_id: 0,
         }
     }
 
@@ -44,7 +44,7 @@ impl ObjectIdTable {
     }
 
     pub fn release_id(&mut self, id: u64) {
-        for mut i in 0..self.ids.len() {
+        for i in 0..self.ids.len() {
             let r = &mut self.ids[i];
             if id >= r.start && id < r.end {
                 if r.end - r.start > 1 {

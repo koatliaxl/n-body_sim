@@ -1,14 +1,12 @@
-use crate::gl_data::GlData;
 use crate::state_and_cfg::RunState::*;
 use crate::state_and_cfg::*;
 use crate::{Msg, World};
-use glfw::Action::{Press, Release, Repeat};
+use glfw::Action::{Press, Release /*Repeat*/};
 use glfw::MouseButton::Button1 as LeftButton;
 use glfw::WindowEvent::{CursorPos, MouseButton /* as MousePress*/, Scroll, Size};
-use glfw::{Action, Key, Window, WindowEvent};
-use mat_vec::Vector3;
+use glfw::{Key, Window, WindowEvent};
+//use mat_vec::Vector3;
 use n_body_sim::gl;
-use n_body_sim::ObjectType::Massive;
 use std::sync::mpsc::Receiver;
 
 pub use create::*;
@@ -29,7 +27,7 @@ pub fn handle_events(
     if window.get_key(Key::Escape) == Press {
         window.set_should_close(true);
         for snd in &state.to_workers {
-            snd.send(Msg::Exit);
+            snd.send(Msg::Exit).expect("main: failed to send msg.");
         }
     }
 

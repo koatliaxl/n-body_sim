@@ -32,5 +32,4 @@ pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32)) {
             state.selected = o.get_id() as i64
         }
     }
-    println!("selected: {}", state.selected)
 }

@@ -5,6 +5,7 @@ pub mod world;
 pub use draw::init_draw;
 
 use super::gl;
+#[allow(unused_imports)]
 use gl::{FRAGMENT_SHADER, GEOMETRY_SHADER, VERTEX_SHADER};
 //use glutin::window::Window;
 use crate::GlData;

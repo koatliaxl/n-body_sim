@@ -35,14 +35,12 @@ pub enum ObjectType {
 
 impl Object {
     pub fn new(x: f64, y: f64, vx: f64, vy: f64, mass: f64) -> Object {
-        unsafe {
-            Object {
-                pos: Vector3::new(x, y, 0.0),
-                vel: Vector3::new(vx, vy, 0.0),
-                mass,
-                class: ObjectType::Massive,
-                id: ID_TABLE.take_new_id(),
-            }
+        Object {
+            pos: Vector3::new(x, y, 0.0),
+            vel: Vector3::new(vx, vy, 0.0),
+            mass,
+            class: ObjectType::Massive,
+            id: unsafe { ID_TABLE.take_new_id() },
         }
     }
 
@@ -80,7 +78,7 @@ impl Clone for Object {
 }
 
 pub fn split_task_length(task_size: usize, number_of_threads: usize) -> Vec<usize> {
-    let mut sub_task = task_size / number_of_threads;
+    let sub_task = task_size / number_of_threads;
     let reminder = task_size % number_of_threads;
     let mut result = vec![sub_task; number_of_threads];
     for i in 0..reminder {
@@ -89,13 +87,13 @@ pub fn split_task_length(task_size: usize, number_of_threads: usize) -> Vec<usiz
     result
 }
 
+// 8/3 -> 3 3 2 ; 7/4 -> 2 2 2 1
 #[allow(dead_code)]
 pub fn split_task<T>(objects: &mut Vec<T>, number_of_threads: usize) -> Vec<&mut [T]> {
     let mut tasks = Vec::new();
     let mut rem_task = objects as &mut [T];
     let rem = rem_task.len() % number_of_threads;
-    // 8/3 -> 3 3 2 ; 7/4 -> 2 2 2 1
-    let mut subtask = rem_task.len() / number_of_threads;
+    let subtask = rem_task.len() / number_of_threads;
     for i in 0..number_of_threads - 1 {
         let mut sep = subtask;
         if i < rem {

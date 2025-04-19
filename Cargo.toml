@@ -1,6 +1,6 @@
 [package]
 name = "n-body_sim"
-version = "0.0.1"
+version = "0.1.0"
 edition = "2018"
 build = "gl/build.rs"
 
@@ -20,7 +20,7 @@ default-features = false
 
 [dependencies.mat_vec]
 git = "https://github.com/koatliaxl/mat_vec.git"
-branch = "main"
+branch = "release"
 
 [profile.dev]
 #incremental = false

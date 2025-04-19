@@ -1,6 +1,6 @@
 use crate::{ObjBuffer, Object, World};
 use mat_vec::Vector3;
-use n_body_sim::ObjectType::Massive;
+//use n_body_sim::ObjectType::Massive;
 use std::sync::{Arc, Mutex};
 
 pub fn init_world(number_threads: usize) -> World {

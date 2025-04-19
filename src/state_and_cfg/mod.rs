@@ -8,6 +8,10 @@ use std::thread;
 use std::thread::JoinHandle;
 use std::time::Instant;
 
+pub use gl_data::GlData;
+
+mod gl_data;
+
 #[derive(PartialEq)]
 pub enum RunState {
     Run,
@@ -51,23 +55,27 @@ pub enum Command {
     },
 }
 
-/*struct ThreadConfig {
+pub struct ThreadConfig {
     pub receiver: Receiver<Msg>,
     pub sender: Sender<Msg>,
     pub id: usize,
-}*/
+}
 
 impl State {
     pub fn new(/*number_of_threads: u32*/ data_mirrors: &Vec<Arc<Mutex<ObjBuffer>>>) -> State {
         let mut to_workers = Vec::new();
         let mut jh_vec = Vec::new();
         let (to_main, from_workers) = mpsc::channel();
-        for m in data_mirrors {
+        for i in 0..data_mirrors.len() {
             let (to_worker, rcv) = mpsc::channel();
-            let sender = to_main.clone();
-            let mirror = Arc::clone(m);
+            let mirror = Arc::clone(&data_mirrors[i]);
+            let th_cfg = ThreadConfig {
+                receiver: rcv,
+                sender: to_main.clone(),
+                id: i,
+            };
             let jh = thread::spawn(move || {
-                compute_in_parallel(rcv, sender, mirror);
+                compute_in_parallel(th_cfg, mirror);
             });
             to_workers.push(to_worker);
             jh_vec.push(jh)

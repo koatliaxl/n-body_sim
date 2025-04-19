@@ -75,6 +75,7 @@ pub unsafe fn gen_shader_program(
     shader_program_id
 }
 
+#[allow(dead_code)]
 pub unsafe fn gen_geometry_shader_program(
     vertex_shader_id: u32,
     fragment_shader_id: u32,

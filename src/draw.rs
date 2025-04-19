@@ -1,5 +1,4 @@
-use crate::gl_data::GlData;
-use crate::{State, World};
+use crate::{GlData, State, World};
 use mat_vec::{Matrix4x4, Vector3};
 use n_body_sim::gl;
 

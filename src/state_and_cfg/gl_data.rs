@@ -78,6 +78,7 @@ impl GlData {
         }
     }
 
+    #[allow(dead_code)]
     pub unsafe fn set_uniform_vec3f(&self, name: &str, shader_program: &str, vec: Vector3<f32>) {
         let var_location = self.get_variable_location(shader_program, name);
         let (v1, v2, v3) = vec.get_components();

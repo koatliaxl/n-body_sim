@@ -1,23 +1,18 @@
 //extern crate core;
 
-use crate::gl_data::GlData;
+//use crate::gl_data::GlData;
 use crate::world::init_world;
 use draw::draw;
-use glfw::{Context, Window};
+use glfw::Context;
 use handle_input::*;
 use init::*;
-use mat_vec::Vector3;
 use n_body_sim::{gl, Object};
 use sim::*;
 use state_and_cfg::RunState::*;
 use state_and_cfg::*;
-use std::sync::mpsc::{Receiver, Sender};
-use std::sync::{mpsc, Arc, Mutex};
-use std::thread;
 use std::time::Instant;
 
 mod draw;
-mod gl_data;
 mod handle_input;
 mod init;
 mod sim;
@@ -91,6 +86,6 @@ fn main() {
         }
     }
     for jh in state.workers {
-        jh.join();
+        jh.join().expect("failed to join worker");
     }
 }
