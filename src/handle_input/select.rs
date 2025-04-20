@@ -21,7 +21,12 @@ pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32)) {
         10.0,
         0.1,
     );
-    for o in &world.objects {
+    for o in world
+        .bodies
+        .lock()
+        .expect("Main: failed to acquire lock for selection")
+        .iter()
+    {
         let (ox, oy, _) = o.pos.get_components();
         let pos_vec4 = Vector4::new(ox as f32, oy as f32, 0.0, 1.0); //todo Vec4: new from Vec3
         let mut pos_on_scr = proj_mat.clone() * view_mat.clone() * pos_vec4;

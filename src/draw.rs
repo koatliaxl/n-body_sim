@@ -16,7 +16,12 @@ pub unsafe fn draw(gl_res: &GlData, world: &World, _state: &State) {
 
     gl::PointSize(3.0);
 
-    for obj in &world.objects {
+    for obj in world
+        .bodies
+        .lock()
+        .expect("Main: failed to acquire lock for drawing")
+        .iter()
+    {
         let (x, y, _) = obj.pos.get_components(); //no conversions yet
         let pos = Vector3::new(x as f32, y as f32, 0.0);
         let model_mat = Matrix4x4::new_translation_from_vec(pos);

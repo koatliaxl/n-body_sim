@@ -1,6 +1,6 @@
 use crate::{Command, State};
 use mat_vec::{Matrix4x4, Vector3, Vector4};
-use n_body_sim::ObjectType::Massive;
+use n_body_sim::BodyType::Massive;
 
 pub fn create_body(state: &mut State, window_size: (i32, i32)) {
     let (x, y) = (

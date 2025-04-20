@@ -6,7 +6,7 @@ use draw::draw;
 use glfw::Context;
 use handle_input::*;
 use init::*;
-use n_body_sim::{gl, Object};
+use n_body_sim::{gl, Body};
 use sim::*;
 use state_and_cfg::RunState::*;
 use state_and_cfg::*;

@@ -18,40 +18,35 @@ pub mod support {
     pub mod id_table;
 }
 
-pub struct Object {
+pub struct Body {
     pub pos: Vector3<f64>,
     pub vel: Vector3<f64>,
     pub mass: f64,
-    pub class: ObjectType,
+    pub class: BodyType,
     id: u64,
 }
 
 #[derive(PartialEq, Copy, Clone)]
-pub enum ObjectType {
+pub enum BodyType {
     Removed,
     Massive,
     Light,
 }
 
-impl Object {
-    pub fn new(x: f64, y: f64, vx: f64, vy: f64, mass: f64) -> Object {
-        Object {
+impl Body {
+    pub fn new(x: f64, y: f64, vx: f64, vy: f64, mass: f64) -> Body {
+        Body {
             pos: Vector3::new(x, y, 0.0),
             vel: Vector3::new(vx, vy, 0.0),
             mass,
-            class: ObjectType::Massive,
+            class: BodyType::Massive,
             id: unsafe { ID_TABLE.take_new_id() },
         }
     }
 
-    pub fn new_by_vec3(
-        pos: Vector3<f64>,
-        vel: Vector3<f64>,
-        mass: f64,
-        class: ObjectType,
-    ) -> Object {
+    pub fn new_by_vec3(pos: Vector3<f64>, vel: Vector3<f64>, mass: f64, class: BodyType) -> Body {
         let id = unsafe { ID_TABLE.take_new_id() };
-        Object {
+        Body {
             pos,
             vel,
             mass,
@@ -65,9 +60,9 @@ impl Object {
     }
 }
 
-impl Clone for Object {
+impl Clone for Body {
     fn clone(&self) -> Self {
-        Object {
+        Body {
             pos: self.pos,
             vel: self.vel,
             mass: self.mass,
