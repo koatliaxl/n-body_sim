@@ -3,6 +3,8 @@ use mat_vec::Vector3;
 use n_body_sim::Body;
 use n_body_sim::BodyType::*;
 //use std::sync::mpsc::{Receiver, Sender};
+use n_body_sim::Collision::*;
+use n_body_sim::SuspectCollChange::*;
 use std::sync::{Arc, Mutex};
 
 pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) {
@@ -24,8 +26,11 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
             let bodies = bodies
                 .lock()
                 .expect("Worker: lock not acquired for parallel read");
+
             compute_forces(&bodies, forces, task, begin);
-            apply_forces(&bodies, changes, forces, delta_t, task, begin);
+            check_suspicion_hitboxes(&bodies, changes, delta_t);
+            move_bodies(changes, forces, delta_t, task, begin);
+
             th_cfg
                 .sender
                 .send(Msg::TaskFinished)
@@ -38,16 +43,25 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
     }
 }
 
-pub fn apply_forces(
+fn check_for_collisions(
     bodies: &Vec<Body>,
+    changes: &mut Vec<Body>,
+) {
+    for body in changes {
+
+    }
+}
+
+fn move_bodies(
+    //bodies: &Vec<Body>,
     changes: &mut Vec<Body>,
     forces: &Vec<Vector3<f64>>,
     delta_t: f64,
     task: usize,
     begin: usize,
 ) {
-    changes.clear();
-    for i in begin..task + begin {
+    //changes.clear();
+    /*for i in begin..task + begin {
         let mut body = bodies[i].clone();
         let force = &forces[i - begin];
         match body.class {
@@ -58,15 +72,56 @@ pub fn apply_forces(
             }
             _ => (),
         }
+    }*/
+    for i in 0..changes.len() {
+        let body = &mut changes[i];
+        let force = &forces[i];
+        match body.class {
+            Massive | Light => {
+                body.vel += force * (1.0 / body.mass) * delta_t;
+                body.pos += body.vel * delta_t;
+            }
+            _ => (),
     }
 }
 
-pub fn compute_forces(
+fn check_suspicion_hitboxes(
     bodies: &Vec<Body>,
-    forces: &mut Vec<Vector3<f64>>,
-    task: usize,
-    begin: usize,
+    changes: &mut Vec<Body>,
+    delta_t: f64,
+    /*task: usize,
+    begin: usize,*/
 ) {
+    for body in changes {
+        for body_2 in bodies {
+            if body.get_id() != body_2.get_id() {
+                let coord_diff = body_2.pos - body.pos;
+                let dot_prod = coord_diff % body.vel; // dot product
+                if dot_prod > 0.0 {
+                    // = body in some degree shortens distance
+                    let diff = coord_diff - body.vel;
+                    // if velocity is comparable to distance:
+                    if diff.x() < body.vel.x() || diff.y() < body.vel.y() {
+                        body.suspect_collision(delta_t, body_2.get_id(), Increase)
+                    } /*else {
+
+                    }*/
+                } else {
+                    body.suspect_collision(delta_t, body_2.get_id(), Decrease)
+                }
+            }
+        }
+    }
+}
+
+fn prepare_changes(bodies: &Vec<Body>, changes: &mut Vec<Body>, task: usize, begin: usize) {
+    changes.clear();
+    for i in begin..task + begin {
+        changes.push(bodies[i].clone())
+    }
+}
+
+fn compute_forces(bodies: &Vec<Body>, forces: &mut Vec<Vector3<f64>>, task: usize, begin: usize) {
     forces.clear();
     for i in begin..task + begin {
         let body = &bodies[i];

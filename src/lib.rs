@@ -1,5 +1,7 @@
-extern crate core;
-
+use std::collections::HashMap;
+//extern crate core;
+use self::Collision::*;
+use self::SuspectCollChange::*;
 use mat_vec::Vector3;
 
 pub use support::id_table::ObjectIdTable;
@@ -24,6 +26,7 @@ pub struct Body {
     pub mass: f64,
     pub class: BodyType,
     id: u64,
+    suspect_for_collision: HashMap<u64, Collision>,
 }
 
 #[derive(PartialEq, Copy, Clone)]
@@ -31,6 +34,20 @@ pub enum BodyType {
     Removed,
     Massive,
     Light,
+}
+
+#[derive(PartialEq, Copy, Clone)]
+pub enum Collision {
+    NotExpected,
+    Suspected { meter: f64 },
+    Collided {},
+}
+
+#[derive(PartialEq, Copy, Clone)]
+pub enum SuspectCollChange {
+    Increase,
+    Decrease,
+    Stagnant,
 }
 
 impl Body {
@@ -41,6 +58,7 @@ impl Body {
             mass,
             class: BodyType::Massive,
             id: unsafe { ID_TABLE.take_new_id() },
+            suspect_for_collision: HashMap::new(),
         }
     }
 
@@ -52,11 +70,45 @@ impl Body {
             mass,
             class,
             id,
+            suspect_for_collision: HashMap::new(),
         }
     }
 
     pub fn get_id(&self) -> u64 {
         self.id
+    }
+
+    pub fn collision_suspection(&self)
+
+    pub fn suspect_collision(&mut self, delta_t: f64, body_id: u64, sus_change: SuspectCollChange) {
+        if let Some(suspect) = self.suspect_for_collision.get_mut(&body_id) {
+            if let Suspected { meter, .. } = suspect {
+                *meter += delta_t * sus_change.value();
+                /*if *meter >= 1.0 {
+                    *suspect = Collided {}
+                } else*/
+                if *meter < 0.0 {
+                    *suspect = NotExpected
+                }
+            }
+        } else {
+            self.suspect_for_collision.insert(
+                body_id,
+                Suspected {
+                    meter: delta_t * sus_change.value(),
+                },
+            )
+        }
+    }
+}
+
+impl SuspectCollChange {
+    pub fn value(&self) -> f64 {
+        match self {
+            Increase => 1.0,
+            Decrease => -1.0,
+            Stagnant => 0.0,
+        }
     }
 }
 
@@ -68,6 +120,7 @@ impl Clone for Body {
             mass: self.mass,
             class: self.class,
             id: self.id,
+            suspect_for_collision: HashMap::new(),
         }
     }
 }

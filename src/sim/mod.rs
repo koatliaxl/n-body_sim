@@ -24,7 +24,7 @@ pub struct ObjBuffer {
     pub begin: usize,
 }
 
-pub fn next_step(world: &mut World, delta_t: f64, state: &State) {
+pub fn begin_next_step(world: &mut World, delta_t: f64, state: &State) {
     let bodies = world.bodies.lock().expect("Main: failed to acquire lock");
     let tasks = split_task_length(bodies.len(), state.workers.len());
     let mut offset = 0;

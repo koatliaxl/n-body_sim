@@ -1,6 +1,3 @@
-//extern crate core;
-
-//use crate::gl_data::GlData;
 use crate::world::init_world;
 use draw::draw;
 use glfw::Context;
@@ -68,7 +65,7 @@ fn main() {
             && state.run_state == Run
             && update_processed
         {
-            next_step(&mut world, tic_duration / 1000.0, &mut state);
+            begin_next_step(&mut world, tic_duration / 1000.0, &mut state);
             state.last_upd_time = Instant::now();
             update_processed = false
         }

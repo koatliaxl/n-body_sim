@@ -27,8 +27,10 @@ pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32)) {
         .expect("Main: failed to acquire lock for selection")
         .iter()
     {
-        let (ox, oy, _) = o.pos.get_components();
-        let pos_vec4 = Vector4::new(ox as f32, oy as f32, 0.0, 1.0); //todo Vec4: new from Vec3
+        /*let (ox, oy, _) = o.pos.get_components();
+        let pos_vec4 = Vector4::new(ox as f32, oy as f32, 0.0, 1.0);*/
+        //todo Vec4: new from Vec3
+        let pos_vec4 = Vector4::from(o.pos);
         let mut pos_on_scr = proj_mat.clone() * view_mat.clone() * pos_vec4;
         pos_on_scr.set_x((pos_on_scr.x() + 1.0) * 0.5 * w);
         pos_on_scr.set_y((1.0 - pos_on_scr.y()) * 0.5 * h);
