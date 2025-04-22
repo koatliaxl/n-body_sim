@@ -81,6 +81,23 @@ impl Body {
         self.id
     }
 
+    pub fn check_for_collision(&mut self, bodies: &Vec<Body>) -> Option<(u64, f64)> {
+        for (id, coll) in &self.suspect_for_collision {
+            if let Expected = coll {
+                for body_2 in bodies {
+                    if *id == body_2.id {
+                        let diff = self.pos - body_2.pos;
+                        let dist = diff.length();
+                        if dist < 0.4 {
+                            return Some((body_2.id, body_2.mass));
+                        }
+                    }
+                }
+            }
+        }
+        None
+    }
+
     pub fn get_suspected_collisions(&mut self) -> &mut HashMap<u64, Collision> {
         &mut self.suspect_for_collision
     }

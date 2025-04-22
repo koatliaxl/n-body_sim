@@ -76,15 +76,18 @@ pub fn update_world(world: &mut World) {
 }
 
 pub fn apply_collisions(world: &mut World) {
-    let (mut bodies, mirrors) = (
+    /*let (mut bodies, mirrors) = (
         world
             .bodies
             .lock()
             .expect("Main: lock not acquired on bodies"),
         &mut world.obj_mirror,
-    );
-
-    for mir in world.obj_mirror {
+    );*/
+    let mut bodies = world
+        .bodies
+        .lock()
+        .expect("Main: lock not acquired on bodies");
+    for mir in &world.obj_mirror {
         let mut guard = mir.lock().expect("Main: lock not acquired on obj. buffer");
         for (id, mass) in &mut guard.collisions {
             for body in bodies.iter_mut() {
@@ -94,10 +97,11 @@ pub fn apply_collisions(world: &mut World) {
             }
         }
     }
-    *bodies = bodies
-        .into_iter()
-        .filter(|body| body.class != Removed)
-        .collect::<Vec<Body>>();
+    bodies.retain(|body| body.class != Removed)
+    /*.iter()
+    //.filter(|body| body.class != Removed)
+    .map(|body| {if body.class != Removed{continue} else {body}})*/
+    //.collect::<Vec<Body>>();
     //let mut collisions = HashMap::new();
 }
 

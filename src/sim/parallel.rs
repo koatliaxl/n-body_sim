@@ -4,7 +4,7 @@ use n_body_sim::Body;
 use n_body_sim::BodyType::*;
 use std::collections::HashMap;
 //use std::sync::mpsc::{Receiver, Sender};
-use n_body_sim::Collision::*;
+//use n_body_sim::Collision::*;
 use n_body_sim::SuspectCollChange::*;
 use std::sync::{Arc, Mutex};
 
@@ -54,26 +54,39 @@ fn check_for_collisions(
 ) {
     collisions.clear();
     for body in changes {
-        for (id, coll) in body.get_suspected_collisions() {
+        /*let (pos, class, sus_coll) = (
+            &mut body.pos,
+            &mut body.class,
+            body.get_suspected_collisions(),
+        );*/
+        if let Some((collided_on_id, mass)) = body.check_for_collision(bodies) {
+            if let Some(x) = collisions.get_mut(&collided_on_id) {
+                *x += mass;
+            } else {
+                collisions.insert(collided_on_id, mass);
+            }
+            body.class = Removed
+        }
+        /*for (id, coll) in sus_coll {
             if let Expected = coll {
                 for body_2 in bodies {
                     if *id == body_2.get_id() {
-                        let diff = body.pos - body_2.pos;
+                        let diff = *pos - body_2.pos;
                         let dist = diff.length();
                         if dist < 0.05 {
-                            //*coll = Collided {}
+                            // *coll = Collided {}
                             //body.class = Collided {on: body_2.get_id()}
                             if let Some(x) = collisions.get_mut(&body_2.get_id()) {
                                 *x += body_2.mass;
                             } else {
                                 collisions.insert(body_2.get_id(), body_2.mass);
                             }
-                            body.class = Removed
+                            *class = Removed
                         }
                     }
                 }
             }
-        }
+        }*/
     }
 }
 
