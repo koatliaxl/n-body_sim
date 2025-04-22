@@ -79,7 +79,8 @@ fn main() {
         glfw.poll_events();
         handle_events(&mut window, &events, &mut state, &gl_data, &world);
         if update_processed {
-            apply_commands(&mut world, &mut state)
+            apply_commands(&mut world, &mut state);
+            apply_collisions(&mut world);
         }
     }
     for jh in state.workers {

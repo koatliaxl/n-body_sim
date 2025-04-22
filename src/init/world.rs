@@ -1,4 +1,5 @@
 use crate::{Body, ObjBuffer, World};
+use std::collections::HashMap;
 //use mat_vec::Vector3;
 //use n_body_sim::ObjectType::Massive;
 use std::sync::{Arc, Mutex};
@@ -27,6 +28,7 @@ pub fn init_world(number_threads: usize) -> World {
             forces: Vec::new(),
             task: 0,
             begin: 0,
+            collisions: HashMap::new(),
         })))
     }
     World {

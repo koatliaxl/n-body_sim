@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+//use std::rc::Rc;
 //extern crate core;
 use self::Collision::*;
 use self::SuspectCollChange::*;
@@ -34,13 +35,15 @@ pub enum BodyType {
     Removed,
     Massive,
     Light,
+    Collided { on: u64 },
 }
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum Collision {
     NotExpected,
     Suspected { meter: f64 },
-    Collided {},
+    Expected,
+    //Collided {},
 }
 
 #[derive(PartialEq, Copy, Clone)]
@@ -78,16 +81,17 @@ impl Body {
         self.id
     }
 
-    pub fn collision_suspection(&self)
+    pub fn get_suspected_collisions(&mut self) -> &mut HashMap<u64, Collision> {
+        &mut self.suspect_for_collision
+    }
 
     pub fn suspect_collision(&mut self, delta_t: f64, body_id: u64, sus_change: SuspectCollChange) {
         if let Some(suspect) = self.suspect_for_collision.get_mut(&body_id) {
             if let Suspected { meter, .. } = suspect {
                 *meter += delta_t * sus_change.value();
-                /*if *meter >= 1.0 {
-                    *suspect = Collided {}
-                } else*/
-                if *meter < 0.0 {
+                if *meter >= 1.0 {
+                    *suspect = Expected
+                } else if *meter < 0.0 {
                     *suspect = NotExpected
                 }
             }
@@ -97,7 +101,7 @@ impl Body {
                 Suspected {
                     meter: delta_t * sus_change.value(),
                 },
-            )
+            );
         }
     }
 }

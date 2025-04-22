@@ -2,6 +2,7 @@ use crate::{Msg, ObjBuffer, ThreadConfig};
 use mat_vec::Vector3;
 use n_body_sim::Body;
 use n_body_sim::BodyType::*;
+use std::collections::HashMap;
 //use std::sync::mpsc::{Receiver, Sender};
 use n_body_sim::Collision::*;
 use n_body_sim::SuspectCollChange::*;
@@ -22,14 +23,17 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
                 ref mut forces,
                 task,
                 begin,
+                ref mut collisions,
             } = *guard;
             let bodies = bodies
                 .lock()
                 .expect("Worker: lock not acquired for parallel read");
 
             compute_forces(&bodies, forces, task, begin);
+            prepare_changes(&bodies, changes, task, begin);
             check_suspicion_hitboxes(&bodies, changes, delta_t);
-            move_bodies(changes, forces, delta_t, task, begin);
+            move_bodies(changes, forces, delta_t /*, task, begin*/);
+            check_for_collisions(&bodies, changes, collisions);
 
             th_cfg
                 .sender
@@ -46,9 +50,30 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
 fn check_for_collisions(
     bodies: &Vec<Body>,
     changes: &mut Vec<Body>,
+    collisions: &mut HashMap<u64, f64>,
 ) {
+    collisions.clear();
     for body in changes {
-
+        for (id, coll) in body.get_suspected_collisions() {
+            if let Expected = coll {
+                for body_2 in bodies {
+                    if *id == body_2.get_id() {
+                        let diff = body.pos - body_2.pos;
+                        let dist = diff.length();
+                        if dist < 0.05 {
+                            //*coll = Collided {}
+                            //body.class = Collided {on: body_2.get_id()}
+                            if let Some(x) = collisions.get_mut(&body_2.get_id()) {
+                                *x += body_2.mass;
+                            } else {
+                                collisions.insert(body_2.get_id(), body_2.mass);
+                            }
+                            body.class = Removed
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -57,8 +82,8 @@ fn move_bodies(
     changes: &mut Vec<Body>,
     forces: &Vec<Vector3<f64>>,
     delta_t: f64,
-    task: usize,
-    begin: usize,
+    /*task: usize,
+    begin: usize,*/
 ) {
     //changes.clear();
     /*for i in begin..task + begin {
@@ -78,10 +103,11 @@ fn move_bodies(
         let force = &forces[i];
         match body.class {
             Massive | Light => {
-                body.vel += force * (1.0 / body.mass) * delta_t;
+                body.vel += *force * (1.0 / body.mass) * delta_t;
                 body.pos += body.vel * delta_t;
             }
             _ => (),
+        }
     }
 }
 
@@ -104,8 +130,7 @@ fn check_suspicion_hitboxes(
                     if diff.x() < body.vel.x() || diff.y() < body.vel.y() {
                         body.suspect_collision(delta_t, body_2.get_id(), Increase)
                     } /*else {
-
-                    }*/
+                      }*/
                 } else {
                     body.suspect_collision(delta_t, body_2.get_id(), Decrease)
                 }
