@@ -29,7 +29,7 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
                 .lock()
                 .expect("Worker: lock not acquired for parallel read");
 
-            compute_forces(&bodies, forces, task, begin);
+            compute_forces(&bodies, forces, task, begin, collisions);
             prepare_changes(&bodies, changes, task, begin);
             check_suspicion_hitboxes(&bodies, changes, delta_t);
             move_bodies(changes, forces, delta_t /*, task, begin*/);
@@ -54,39 +54,15 @@ fn check_for_collisions(
 ) {
     collisions.clear();
     for body in changes {
-        /*let (pos, class, sus_coll) = (
-            &mut body.pos,
-            &mut body.class,
-            body.get_suspected_collisions(),
-        );*/
         if let Some((collided_on_id, mass)) = body.check_for_collision(bodies) {
             if let Some(x) = collisions.get_mut(&collided_on_id) {
                 *x += mass;
             } else {
                 collisions.insert(collided_on_id, mass);
             }
-            body.class = Removed
+            body.class = Removed;
+            println!("collision happen")
         }
-        /*for (id, coll) in sus_coll {
-            if let Expected = coll {
-                for body_2 in bodies {
-                    if *id == body_2.get_id() {
-                        let diff = *pos - body_2.pos;
-                        let dist = diff.length();
-                        if dist < 0.05 {
-                            // *coll = Collided {}
-                            //body.class = Collided {on: body_2.get_id()}
-                            if let Some(x) = collisions.get_mut(&body_2.get_id()) {
-                                *x += body_2.mass;
-                            } else {
-                                collisions.insert(body_2.get_id(), body_2.mass);
-                            }
-                            *class = Removed
-                        }
-                    }
-                }
-            }
-        }*/
     }
 }
 
@@ -98,19 +74,6 @@ fn move_bodies(
     /*task: usize,
     begin: usize,*/
 ) {
-    //changes.clear();
-    /*for i in begin..task + begin {
-        let mut body = bodies[i].clone();
-        let force = &forces[i - begin];
-        match body.class {
-            Massive | Light => {
-                body.vel += *force * (1.0 / body.mass) * delta_t;
-                body.pos += body.vel * delta_t;
-                changes.push(body)
-            }
-            _ => (),
-        }
-    }*/
     for i in 0..changes.len() {
         let body = &mut changes[i];
         let force = &forces[i];
@@ -141,11 +104,22 @@ fn check_suspicion_hitboxes(
                     let diff = coord_diff - body.vel;
                     // if velocity is comparable to distance:
                     if diff.x() < body.vel.x() || diff.y() < body.vel.y() {
-                        body.suspect_collision(delta_t, body_2.get_id(), Increase)
+                        body.suspect_collision(delta_t, body_2.get_id(), Increase);
+                        /*println!(
+                            "suspect on collision for body: {} on body: {} has increased",
+                            body.get_id(),
+                            body_2.get_id()
+                        )*/
                     } /*else {
                       }*/
+                //println!("some collision suspected")
                 } else {
-                    body.suspect_collision(delta_t, body_2.get_id(), Decrease)
+                    body.suspect_collision(delta_t, body_2.get_id(), Decrease);
+                    /*println!(
+                        "suspect on collision for body: {} on body: {} has decreased",
+                        body.get_id(),
+                        body_2.get_id()
+                    )*/
                 }
             }
         }
@@ -159,7 +133,13 @@ fn prepare_changes(bodies: &Vec<Body>, changes: &mut Vec<Body>, task: usize, beg
     }
 }
 
-fn compute_forces(bodies: &Vec<Body>, forces: &mut Vec<Vector3<f64>>, task: usize, begin: usize) {
+fn compute_forces(
+    bodies: &Vec<Body>,
+    forces: &mut Vec<Vector3<f64>>,
+    task: usize,
+    begin: usize,
+    collisions: &mut HashMap<u64, f64>,
+) {
     forces.clear();
     for i in begin..task + begin {
         let body = &bodies[i];
@@ -169,6 +149,7 @@ fn compute_forces(bodies: &Vec<Body>, forces: &mut Vec<Vector3<f64>>, task: usiz
                 let body_2 = &bodies[j];
                 if j != i && body_2.class == Massive {
                     let displacement = body.pos - body_2.pos;
+                    // todo early merging
                     let dist_sqr = displacement.x().powi(2) + displacement.y().powi(2);
                     //let dist = dist_sqr.sqrt();
                     let dir = -displacement.normalize();

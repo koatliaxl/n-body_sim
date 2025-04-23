@@ -35,12 +35,12 @@ pub enum BodyType {
     Removed,
     Massive,
     Light,
-    Collided { on: u64 },
+    //Collided { on: u64 },
 }
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum Collision {
-    NotExpected,
+    //NotExpected,
     Suspected { meter: f64 },
     Expected,
     //Collided {},
@@ -104,15 +104,24 @@ impl Body {
 
     pub fn suspect_collision(&mut self, delta_t: f64, body_id: u64, sus_change: SuspectCollChange) {
         if let Some(suspect) = self.suspect_for_collision.get_mut(&body_id) {
+            //println!("allready sus.");
             if let Suspected { meter, .. } = suspect {
                 *meter += delta_t * sus_change.value();
+                //println!("meter: {}", meter);
                 if *meter >= 1.0 {
-                    *suspect = Expected
+                    *suspect = Expected;
+                    println!(
+                        "some collision was expected, by body: {}, on body: {}",
+                        self.id, body_id
+                    )
                 } else if *meter < 0.0 {
-                    *suspect = NotExpected
+                    //*suspect = NotExpected;
+                    self.suspect_for_collision.remove(&body_id);
+                    println!("suspicion removed")
                 }
             }
         } else {
+            //println!("sus. added");
             self.suspect_for_collision.insert(
                 body_id,
                 Suspected {
@@ -141,7 +150,11 @@ impl Clone for Body {
             mass: self.mass,
             class: self.class,
             id: self.id,
-            suspect_for_collision: HashMap::new(),
+            suspect_for_collision: self
+                .suspect_for_collision
+                .iter()
+                .map(|(id, coll)| (*id, coll.clone()))
+                .collect::<HashMap<u64, Collision>>(),
         }
     }
 }
