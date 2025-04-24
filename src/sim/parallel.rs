@@ -1,7 +1,7 @@
 use crate::{Msg, ObjBuffer, ThreadConfig};
 use mat_vec::Vector3;
-use n_body_sim::Body;
 use n_body_sim::BodyType::*;
+use n_body_sim::{Body, Collision};
 use std::collections::HashMap;
 //use std::sync::mpsc::{Receiver, Sender};
 //use n_body_sim::Collision::*;
@@ -50,18 +50,36 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
 fn check_for_collisions(
     bodies: &Vec<Body>,
     changes: &mut Vec<Body>,
-    collisions: &mut HashMap<u64, f64>,
+    collisions: &mut HashMap<u64, Collision>,
 ) {
     collisions.clear();
     for body in changes {
-        if let Some((collided_on_id, mass)) = body.check_for_collision(bodies) {
-            if let Some(x) = collisions.get_mut(&collided_on_id) {
-                *x += mass;
-            } else {
-                collisions.insert(collided_on_id, mass);
+        if let Some((body_2_id, body_2)) = body.check_for_collision(bodies) {
+            let diff = body.pos - body_2.pos;
+            let dist = diff.length();
+            if dist < 0.4 {
+                if let Some(Collision {
+                    mass,
+                    vel, /* rust fmt force vertical */
+                }) = collisions.get_mut(&body_2_id)
+                {
+                    let rel_vel = body_2.vel - body.vel;
+                    let momentum_1 = *mass * *vel;
+                    let momentum_2 = rel_vel * body.mass;
+                    *vel = (momentum_1 + momentum_2) * (1.0 / (*mass * body.mass));
+                    *mass += body.mass;
+                } else {
+                    collisions.insert(
+                        body_2_id,
+                        Collision {
+                            mass: body.mass,
+                            vel: body_2.vel - body.vel,
+                        },
+                    );
+                }
+                body.class = Removed;
+                println!("collision happened")
             }
-            body.class = Removed;
-            println!("collision happen")
         }
     }
 }
@@ -96,7 +114,14 @@ fn check_suspicion_hitboxes(
 ) {
     for body in changes {
         for body_2 in bodies {
-            if body.get_id() != body_2.get_id() {
+            // ATTENTION! The next thing bellow might appear very murky on the first glance, but
+            // wait, before thinking or doing something, it will be explained bellow.
+            //   This is to prevent of the duplicate collision (with reverse body IDs) for being
+            // added and tracked. For this, a some mechanism is needed that for the any pair
+            // of bodies IDs choose one order but not another. Compare is used, because "not equal"
+            // check is already being used in this place, to prevent the collision check of
+            // the body with it self.
+            if body.get_id() > body_2.get_id() {
                 let coord_diff = body_2.pos - body.pos;
                 let dot_prod = coord_diff % body.vel; // dot product
                 if dot_prod > 0.0 {
@@ -105,21 +130,11 @@ fn check_suspicion_hitboxes(
                     // if velocity is comparable to distance:
                     if diff.x() < body.vel.x() || diff.y() < body.vel.y() {
                         body.suspect_collision(delta_t, body_2.get_id(), Increase);
-                        /*println!(
-                            "suspect on collision for body: {} on body: {} has increased",
-                            body.get_id(),
-                            body_2.get_id()
-                        )*/
                     } /*else {
                       }*/
                 //println!("some collision suspected")
                 } else {
                     body.suspect_collision(delta_t, body_2.get_id(), Decrease);
-                    /*println!(
-                        "suspect on collision for body: {} on body: {} has decreased",
-                        body.get_id(),
-                        body_2.get_id()
-                    )*/
                 }
             }
         }
@@ -138,7 +153,7 @@ fn compute_forces(
     forces: &mut Vec<Vector3<f64>>,
     task: usize,
     begin: usize,
-    collisions: &mut HashMap<u64, f64>,
+    collisions: &mut HashMap<u64, Collision>,
 ) {
     forces.clear();
     for i in begin..task + begin {

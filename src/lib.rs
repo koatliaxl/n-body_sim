@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 //use std::rc::Rc;
 //extern crate core;
-use self::Collision::*;
 use self::SuspectCollChange::*;
+use self::SuspectedCollision::*;
 use mat_vec::Vector3;
 
 pub use support::id_table::ObjectIdTable;
@@ -27,7 +27,7 @@ pub struct Body {
     pub mass: f64,
     pub class: BodyType,
     id: u64,
-    suspect_for_collision: HashMap<u64, Collision>,
+    suspect_for_collision: HashMap<u64, SuspectedCollision>,
 }
 
 #[derive(PartialEq, Copy, Clone)]
@@ -38,12 +38,24 @@ pub enum BodyType {
     //Collided { on: u64 },
 }
 
+#[derive(Copy, Clone)]
+pub struct Collision {
+    //pub on_body: u64,
+    pub mass: f64,
+    pub vel: Vector3<f64>,
+}
+
 #[derive(PartialEq, Copy, Clone)]
-pub enum Collision {
+pub enum SuspectedCollision {
     //NotExpected,
     Suspected { meter: f64 },
-    Expected,
-    //Collided {},
+    //Expected { of_body: u64,},
+    //Collided { on_body: u64, mass: f64, vel: Vector3<f64>},
+
+    // placeholder to prevent the duplicate collision with reverse body IDs,
+    // for being added and tracked, and to avoid mutual collisions - "mutual annihilation" in some
+    // cases
+    //Mirror
 }
 
 #[derive(PartialEq, Copy, Clone)]
@@ -81,15 +93,27 @@ impl Body {
         self.id
     }
 
-    pub fn check_for_collision(&mut self, bodies: &Vec<Body>) -> Option<(u64, f64)> {
+    pub fn check_for_collision<'a>(&'a self, bodies: &'a Vec<Body>) -> Option<(u64, &Body)> {
         for (id, coll) in &self.suspect_for_collision {
-            if let Expected = coll {
-                for body_2 in bodies {
-                    if *id == body_2.id {
-                        let diff = self.pos - body_2.pos;
-                        let dist = diff.length();
-                        if dist < 0.4 {
-                            return Some((body_2.id, body_2.mass));
+            if let Suspected { meter } = coll {
+                if *meter >= 0.1 {
+                    /*println!(
+                        "some collision was expected, by body: {}, on body: {}",
+                        self.id, id
+                    );*/
+                    for body_2 in bodies {
+                        if *id == body_2.id {
+                            return Some((body_2.id, &body_2));
+                            /*let diff = self.pos - body_2.pos;
+                            let dist = diff.length();
+                            if dist < 0.4 {
+                                let momentum =
+                                return Some((Collision {
+                                    //on_body: body_2.id,
+                                    mass: self.mass,
+                                    momentum: self.vel * self.mass
+                                }));
+                            }*/
                         }
                     }
                 }
@@ -98,26 +122,26 @@ impl Body {
         None
     }
 
-    pub fn get_suspected_collisions(&mut self) -> &mut HashMap<u64, Collision> {
+    pub fn get_suspected_collisions(&mut self) -> &mut HashMap<u64, SuspectedCollision> {
         &mut self.suspect_for_collision
     }
 
     pub fn suspect_collision(&mut self, delta_t: f64, body_id: u64, sus_change: SuspectCollChange) {
         if let Some(suspect) = self.suspect_for_collision.get_mut(&body_id) {
-            //println!("allready sus.");
+            //println!("already sus.");
             if let Suspected { meter, .. } = suspect {
                 *meter += delta_t * sus_change.value();
                 //println!("meter: {}", meter);
-                if *meter >= 1.0 {
-                    *suspect = Expected;
-                    println!(
-                        "some collision was expected, by body: {}, on body: {}",
-                        self.id, body_id
-                    )
-                } else if *meter < 0.0 {
+                /*if *meter >= 1.0 {
+                *suspect = Expected;
+                println!(
+                    "some collision was expected, by body: {}, on body: {}",
+                    self.id, body_id
+                )*/
+                if *meter < 0.0 {
                     //*suspect = NotExpected;
                     self.suspect_for_collision.remove(&body_id);
-                    println!("suspicion removed")
+                    //println!("suspicion removed")
                 }
             }
         } else {
@@ -154,7 +178,7 @@ impl Clone for Body {
                 .suspect_for_collision
                 .iter()
                 .map(|(id, coll)| (*id, coll.clone()))
-                .collect::<HashMap<u64, Collision>>(),
+                .collect::<HashMap<u64, SuspectedCollision>>(),
         }
     }
 }
