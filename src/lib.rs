@@ -1,13 +1,12 @@
-use std::collections::HashMap;
-//use std::rc::Rc;
-//extern crate core;
 use self::SuspectCollChange::*;
 use self::SuspectedCollision::*;
 use mat_vec::Vector3;
+use std::collections::HashMap;
 
 pub use support::id_table::ObjectIdTable;
 
 pub const SIZE_OF_GL_FLOAT: isize = std::mem::size_of::<gl::types::GLfloat>() as isize;
+pub static SUSPECT_COLLISION_THRESHOLD: f64 = 0.1;
 
 pub static mut ID_TABLE: ObjectIdTable = ObjectIdTable::new();
 
@@ -35,7 +34,6 @@ pub enum BodyType {
     Removed,
     Massive,
     Light,
-    //Collided { on: u64 },
 }
 
 #[derive(Copy, Clone)]
@@ -47,15 +45,7 @@ pub struct Collision {
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum SuspectedCollision {
-    //NotExpected,
     Suspected { meter: f64 },
-    //Expected { of_body: u64,},
-    //Collided { on_body: u64, mass: f64, vel: Vector3<f64>},
-
-    // placeholder to prevent the duplicate collision with reverse body IDs,
-    // for being added and tracked, and to avoid mutual collisions - "mutual annihilation" in some
-    // cases
-    //Mirror
 }
 
 #[derive(PartialEq, Copy, Clone)]
@@ -95,26 +85,11 @@ impl Body {
 
     pub fn check_for_collision<'a>(&'a self, bodies: &'a Vec<Body>) -> Option<(u64, &Body)> {
         for (id, coll) in &self.suspect_for_collision {
-            if let Suspected { meter } = coll {
-                if *meter >= 0.1 {
-                    /*println!(
-                        "some collision was expected, by body: {}, on body: {}",
-                        self.id, id
-                    );*/
-                    for body_2 in bodies {
-                        if *id == body_2.id {
-                            return Some((body_2.id, &body_2));
-                            /*let diff = self.pos - body_2.pos;
-                            let dist = diff.length();
-                            if dist < 0.4 {
-                                let momentum =
-                                return Some((Collision {
-                                    //on_body: body_2.id,
-                                    mass: self.mass,
-                                    momentum: self.vel * self.mass
-                                }));
-                            }*/
-                        }
+            let Suspected { meter } = coll;
+            if *meter >= SUSPECT_COLLISION_THRESHOLD {
+                for body_2 in bodies {
+                    if *id == body_2.id {
+                        return Some((body_2.id, &body_2));
                     }
                 }
             }
@@ -122,30 +97,18 @@ impl Body {
         None
     }
 
-    pub fn get_suspected_collisions(&mut self) -> &mut HashMap<u64, SuspectedCollision> {
+    /*pub fn get_suspected_collisions(&mut self) -> &mut HashMap<u64, SuspectedCollision> {
         &mut self.suspect_for_collision
-    }
+    }*/
 
     pub fn suspect_collision(&mut self, delta_t: f64, body_id: u64, sus_change: SuspectCollChange) {
         if let Some(suspect) = self.suspect_for_collision.get_mut(&body_id) {
-            //println!("already sus.");
-            if let Suspected { meter, .. } = suspect {
-                *meter += delta_t * sus_change.value();
-                //println!("meter: {}", meter);
-                /*if *meter >= 1.0 {
-                *suspect = Expected;
-                println!(
-                    "some collision was expected, by body: {}, on body: {}",
-                    self.id, body_id
-                )*/
-                if *meter < 0.0 {
-                    //*suspect = NotExpected;
-                    self.suspect_for_collision.remove(&body_id);
-                    //println!("suspicion removed")
-                }
+            let Suspected { meter, .. } = suspect;
+            *meter += delta_t * sus_change.value();
+            if *meter < 0.0 {
+                self.suspect_for_collision.remove(&body_id);
             }
         } else {
-            //println!("sus. added");
             self.suspect_for_collision.insert(
                 body_id,
                 Suspected {

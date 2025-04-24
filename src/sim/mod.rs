@@ -11,6 +11,8 @@ pub use parallel::*;
 
 mod parallel;
 
+pub static BODY_RADIUS: f64 = 0.4;
+
 pub struct World {
     pub bodies: Arc<Mutex<Vec<Body>>>,
     pub forces: Vec<Vector3<f64>>,
@@ -23,7 +25,7 @@ pub struct ObjBuffer {
     pub forces: Vec<Vector3<f64>>,
     pub task: usize,
     pub begin: usize,
-    pub collisions: HashMap<u64, Collision>, // value = total mass gained by the collisions
+    pub collisions: HashMap<u64, Collision>,
 }
 
 pub fn begin_next_step(world: &mut World, delta_t: f64, state: &State) {

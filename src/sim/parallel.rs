@@ -1,4 +1,4 @@
-use crate::{Msg, ObjBuffer, ThreadConfig};
+use crate::{Msg, ObjBuffer, ThreadConfig, BODY_RADIUS};
 use mat_vec::Vector3;
 use n_body_sim::BodyType::*;
 use n_body_sim::{Body, Collision};
@@ -57,7 +57,7 @@ fn check_for_collisions(
         if let Some((body_2_id, body_2)) = body.check_for_collision(bodies) {
             let diff = body.pos - body_2.pos;
             let dist = diff.length();
-            if dist < 0.4 {
+            if dist < BODY_RADIUS {
                 if let Some(Collision {
                     mass,
                     vel, /* rust fmt force vertical */
@@ -84,14 +84,7 @@ fn check_for_collisions(
     }
 }
 
-fn move_bodies(
-    //bodies: &Vec<Body>,
-    changes: &mut Vec<Body>,
-    forces: &Vec<Vector3<f64>>,
-    delta_t: f64,
-    /*task: usize,
-    begin: usize,*/
-) {
+fn move_bodies(changes: &mut Vec<Body>, forces: &Vec<Vector3<f64>>, delta_t: f64) {
     for i in 0..changes.len() {
         let body = &mut changes[i];
         let force = &forces[i];
@@ -105,13 +98,7 @@ fn move_bodies(
     }
 }
 
-fn check_suspicion_hitboxes(
-    bodies: &Vec<Body>,
-    changes: &mut Vec<Body>,
-    delta_t: f64,
-    /*task: usize,
-    begin: usize,*/
-) {
+fn check_suspicion_hitboxes(bodies: &Vec<Body>, changes: &mut Vec<Body>, delta_t: f64) {
     for body in changes {
         for body_2 in bodies {
             // ATTENTION! The next thing bellow might appear very murky on the first glance, but
@@ -132,7 +119,6 @@ fn check_suspicion_hitboxes(
                         body.suspect_collision(delta_t, body_2.get_id(), Increase);
                     } /*else {
                       }*/
-                //println!("some collision suspected")
                 } else {
                     body.suspect_collision(delta_t, body_2.get_id(), Decrease);
                 }
