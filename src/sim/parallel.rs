@@ -1,4 +1,4 @@
-use crate::{Msg, ObjBuffer, ThreadConfig, BODY_RADIUS};
+use crate::{Msg, ObjBuffer, ThreadConfig, BODY_RADIUS, BODY_RADIUS_SQR};
 use mat_vec::Vector3;
 use n_body_sim::BodyType::*;
 use n_body_sim::{Body, Collision};
@@ -29,8 +29,8 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
                 .lock()
                 .expect("Worker: lock not acquired for parallel read");
 
-            compute_forces(&bodies, forces, task, begin, collisions);
             prepare_changes(&bodies, changes, task, begin);
+            compute_forces(&bodies, changes, forces, /*task, begin,*/ collisions);
             check_suspicion_hitboxes(&bodies, changes, delta_t);
             move_bodies(changes, forces, delta_t /*, task, begin*/);
             check_for_collisions(&bodies, changes, collisions);
@@ -54,11 +54,12 @@ fn check_for_collisions(
 ) {
     collisions.clear();
     for body in changes {
-        if let Some((body_2_id, body_2)) = body.check_for_collision(bodies) {
+        if let Some(body_2) = body.check_for_collision(bodies) {
             let diff = body.pos - body_2.pos;
             let dist = diff.length();
             if dist < BODY_RADIUS {
-                if let Some(Collision {
+                add_to_collisions(collisions, body, body_2)
+                /*if let Some(Collision {
                     mass,
                     vel, /* rust fmt force vertical */
                 }) = collisions.get_mut(&body_2_id)
@@ -78,7 +79,7 @@ fn check_for_collisions(
                     );
                 }
                 body.class = Removed;
-                println!("collision happened")
+                println!("collision happened")*/
             }
         }
     }
@@ -136,22 +137,27 @@ fn prepare_changes(bodies: &Vec<Body>, changes: &mut Vec<Body>, task: usize, beg
 
 fn compute_forces(
     bodies: &Vec<Body>,
+    changes: &mut Vec<Body>,
     forces: &mut Vec<Vector3<f64>>,
-    task: usize,
-    begin: usize,
+    /*task: usize,
+    begin: usize,*/
     collisions: &mut HashMap<u64, Collision>,
 ) {
     forces.clear();
-    for i in begin..task + begin {
-        let body = &bodies[i];
+    for body in changes {
+        //let body = &bodies[i];
         if body.class == Massive || body.class == Light {
             let mut total_force = Vector3::default();
-            for j in 0..bodies.len() {
+            'l1: for j in 0..bodies.len() {
                 let body_2 = &bodies[j];
-                if j != i && body_2.class == Massive {
+                if body.get_id() != body_2.get_id() && body_2.class == Massive {
                     let displacement = body.pos - body_2.pos;
-                    // todo early merging
                     let dist_sqr = displacement.x().powi(2) + displacement.y().powi(2);
+                    if dist_sqr < BODY_RADIUS_SQR && body.get_id() > body_2.get_id() {
+                        add_to_collisions(collisions, body, body_2);
+                        forces.push(total_force);
+                        break 'l1;
+                    }
                     //let dist = dist_sqr.sqrt();
                     let dir = -displacement.normalize();
                     total_force += dir * body.mass * body_2.mass * (1.0 / dist_sqr);
@@ -160,4 +166,28 @@ fn compute_forces(
             forces.push(total_force)
         }
     }
+}
+
+fn add_to_collisions(collisions: &mut HashMap<u64, Collision>, body: &mut Body, to_body: &Body) {
+    if let Some(Collision {
+        mass,
+        vel, /* rust fmt force vertical */
+    }) = collisions.get_mut(&to_body.get_id())
+    {
+        let rel_vel = to_body.vel - body.vel;
+        let momentum_1 = *mass * *vel;
+        let momentum_2 = rel_vel * body.mass;
+        *vel = (momentum_1 + momentum_2) * (1.0 / (*mass * body.mass));
+        *mass += body.mass;
+    } else {
+        collisions.insert(
+            to_body.get_id(),
+            Collision {
+                mass: body.mass,
+                vel: to_body.vel - body.vel,
+            },
+        );
+    }
+    body.class = Removed;
+    println!("collision happened")
 }

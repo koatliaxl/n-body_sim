@@ -83,13 +83,13 @@ impl Body {
         self.id
     }
 
-    pub fn check_for_collision<'a>(&'a self, bodies: &'a Vec<Body>) -> Option<(u64, &Body)> {
+    pub fn check_for_collision<'a>(&self, bodies: &'a Vec<Body>) -> Option<&'a Body> {
         for (id, coll) in &self.suspect_for_collision {
             let Suspected { meter } = coll;
             if *meter >= SUSPECT_COLLISION_THRESHOLD {
                 for body_2 in bodies {
                     if *id == body_2.id {
-                        return Some((body_2.id, &body_2));
+                        return Some(&body_2);
                     }
                 }
             }

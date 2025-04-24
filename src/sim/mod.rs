@@ -12,6 +12,7 @@ pub use parallel::*;
 mod parallel;
 
 pub static BODY_RADIUS: f64 = 0.4;
+pub static BODY_RADIUS_SQR: f64 = BODY_RADIUS * BODY_RADIUS/*BODY_RADIUS.powi(2)*/;
 
 pub struct World {
     pub bodies: Arc<Mutex<Vec<Body>>>,
