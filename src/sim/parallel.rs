@@ -155,7 +155,7 @@ fn compute_forces(
                     let dist_sqr = displacement.x().powi(2) + displacement.y().powi(2);
                     if dist_sqr < BODY_RADIUS_SQR && body.get_id() > body_2.get_id() {
                         add_to_collisions(collisions, body, body_2);
-                        forces.push(total_force);
+                        //forces.push(total_force);
                         break 'l1;
                     }
                     //let dist = dist_sqr.sqrt();
