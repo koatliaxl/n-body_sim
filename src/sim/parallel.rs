@@ -1,4 +1,4 @@
-use crate::{Msg, ObjBuffer, ThreadConfig, BODY_RADIUS, BODY_RADIUS_SQR};
+use crate::{Msg, ObjBuffer, ThreadConfig, /*BODY_RADIUS, BODY_RADIUS_SQR*/};
 use mat_vec::Vector3;
 use n_body_sim::BodyType::*;
 use n_body_sim::{Body, Collision};
@@ -57,29 +57,8 @@ fn check_for_collisions(
         if let Some(body_2) = body.check_for_collision(bodies) {
             let diff = body.pos - body_2.pos;
             let dist = diff.length();
-            if dist < BODY_RADIUS {
+            if dist < body.get_radius() {
                 add_to_collisions(collisions, body, body_2)
-                /*if let Some(Collision {
-                    mass,
-                    vel, /* rust fmt force vertical */
-                }) = collisions.get_mut(&body_2_id)
-                {
-                    let rel_vel = body_2.vel - body.vel;
-                    let momentum_1 = *mass * *vel;
-                    let momentum_2 = rel_vel * body.mass;
-                    *vel = (momentum_1 + momentum_2) * (1.0 / (*mass * body.mass));
-                    *mass += body.mass;
-                } else {
-                    collisions.insert(
-                        body_2_id,
-                        Collision {
-                            mass: body.mass,
-                            vel: body_2.vel - body.vel,
-                        },
-                    );
-                }
-                body.class = Removed;
-                println!("collision happened")*/
             }
         }
     }
@@ -153,7 +132,8 @@ fn compute_forces(
                 if body.get_id() != body_2.get_id() && body_2.class == Massive {
                     let displacement = body.pos - body_2.pos;
                     let dist_sqr = displacement.x().powi(2) + displacement.y().powi(2);
-                    if dist_sqr < BODY_RADIUS_SQR && body.get_id() > body_2.get_id() {
+                    let rad_sqr = body.get_radius().powi(2);
+                    if dist_sqr < rad_sqr && body.get_id() > body_2.get_id() {
                         add_to_collisions(collisions, body, body_2);
                         //forces.push(total_force);
                         break 'l1;

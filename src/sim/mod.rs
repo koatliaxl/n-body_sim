@@ -11,8 +11,8 @@ pub use parallel::*;
 
 mod parallel;
 
-pub static BODY_RADIUS: f64 = 0.4;
-pub static BODY_RADIUS_SQR: f64 = BODY_RADIUS * BODY_RADIUS/*BODY_RADIUS.powi(2)*/;
+/*pub static BODY_RADIUS: f64 = 0.4;
+pub static _BODY_RADIUS_SQR: f64 = BODY_RADIUS * BODY_RADIUS/*BODY_RADIUS.powi(2)*/;*/
 
 pub struct World {
     pub bodies: Arc<Mutex<Vec<Body>>>,
@@ -86,12 +86,14 @@ pub fn apply_collisions(world: &mut World) {
     for mir in &world.obj_mirror {
         let mut guard = mir.lock().expect("Main: lock not acquired on obj. buffer");
         for (id, Collision { mass, vel }) in &mut guard.collisions {
-            for body in bodies.iter_mut() {
+            'inner: for body in bodies.iter_mut() {
                 if *id == body.get_id() {
                     //let rel_vel = body.vel - *vel;
                     let momentum = *vel * *mass; // collision vel. is already relative
                     body.vel += momentum * (1.0 / (*mass + body.mass));
-                    body.mass += *mass
+                    body.mass += *mass;
+                    body.update_radius();
+                    break 'inner;
                 }
             }
         }

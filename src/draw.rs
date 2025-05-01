@@ -1,10 +1,11 @@
 use crate::{GlData, State, World};
 use mat_vec::{Matrix4x4, Vector3};
 use n_body_sim::gl;
+//use std::f32::consts::PI;
 
-pub static BODY_GFX_RAD: f32 = 0.4;
+pub static BODY_GFX_SCALE: f32 = 0.4;
 
-pub unsafe fn draw(gl_res: &GlData, world: &World, _state: &State) {
+pub unsafe fn draw(gl_res: &GlData, world: &World, state: &State) {
     gl::ClearColor(0.2, 0.1, 0.5, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
     let shader = gl_res.get_shader_gl_id("Object shader");
@@ -25,9 +26,13 @@ pub unsafe fn draw(gl_res: &GlData, world: &World, _state: &State) {
         let (x, y, _) = obj.pos.get_components(); //no conversions yet
         let pos = Vector3::new(x as f32, y as f32, 0.0);
         let model_mat = Matrix4x4::new_translation_from_vec(pos);
+        //let body_gfx_radius = (obj.mass as f32 * 1.0 / PI).sqrt() as f32;
+        //let body_radius =
+        let scaling = Matrix4x4::new_uniform_scaling(obj.get_radius() as f32);
+        let model_mat = model_mat * scaling;
         gl_res.set_uniform_mat4x4("model_mat", "Object shader", &model_mat);
         //gl::DrawArrays(gl::POINTS, 0, 16);
-        if obj.get_id() == _state.selected as u64 {
+        if obj.get_id() == state.selected as u64 {
             gl::DrawArrays(gl::LINES, 0, 16);
         } else {
             gl::DrawArrays(gl::LINE_LOOP, 0, 16);

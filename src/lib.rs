@@ -7,6 +7,8 @@ pub use support::id_table::ObjectIdTable;
 
 pub const SIZE_OF_GL_FLOAT: isize = std::mem::size_of::<gl::types::GLfloat>() as isize;
 pub static SUSPECT_COLLISION_THRESHOLD: f64 = 0.1;
+pub static BODY_DENSITY_VALUE: f64 = 1.0;
+pub static BODY_RADIUS_OF_/* unit mass */:f64 = 0.4;
 
 pub static mut ID_TABLE: ObjectIdTable = ObjectIdTable::new();
 
@@ -24,6 +26,7 @@ pub struct Body {
     pub pos: Vector3<f64>,
     pub vel: Vector3<f64>,
     pub mass: f64,
+    phys_radius: f64,
     pub class: BodyType,
     id: u64,
     suspect_for_collision: HashMap<u64, SuspectedCollision>,
@@ -64,6 +67,7 @@ impl Body {
             class: BodyType::Massive,
             id: unsafe { ID_TABLE.take_new_id() },
             suspect_for_collision: HashMap::new(),
+            phys_radius: Self::calculate_radius(mass)
         }
     }
 
@@ -76,11 +80,25 @@ impl Body {
             class,
             id,
             suspect_for_collision: HashMap::new(),
+            phys_radius: Self::calculate_radius(mass)
         }
+    }
+
+    pub fn calculate_radius(mass: f64) -> f64{
+        use std::f64::consts::PI;
+        (mass * BODY_RADIUS_OF_ * BODY_DENSITY_VALUE / PI).sqrt()
     }
 
     pub fn get_id(&self) -> u64 {
         self.id
+    }
+
+    pub fn get_radius(&self) -> f64 {
+        self.phys_radius
+    }
+
+    pub fn update_radius(&mut self) {
+        self.phys_radius = Self::calculate_radius(self.mass)
     }
 
     pub fn check_for_collision<'a>(&self, bodies: &'a Vec<Body>) -> Option<&'a Body> {
@@ -142,6 +160,7 @@ impl Clone for Body {
                 .iter()
                 .map(|(id, coll)| (*id, coll.clone()))
                 .collect::<HashMap<u64, SuspectedCollision>>(),
+            phys_radius: self.phys_radius
         }
     }
 }

@@ -1,4 +1,4 @@
-use crate::draw::BODY_GFX_RAD;
+use crate::draw::BODY_GFX_SCALE;
 use crate::{State, World};
 use mat_vec::{Matrix4x4, Vector3, Vector4};
 
@@ -35,7 +35,8 @@ pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32)) {
         pos_on_scr.set_x((pos_on_scr.x() + 1.0) * 0.5 * w);
         pos_on_scr.set_y((1.0 - pos_on_scr.y()) * 0.5 * h);
         let equation_val = (x - pos_on_scr.x()).powi(2) + (y - pos_on_scr.y()).powi(2);
-        if equation_val < (BODY_GFX_RAD / state.view_scale * (w + h) / 2.0).powi(2) {
+        let radius = BODY_GFX_SCALE * o.get_radius() as f32;
+        if equation_val < ( radius / state.view_scale * (w + h) / 2.0).powi(2) {
             state.selected = o.get_id() as i64
         }
     }
