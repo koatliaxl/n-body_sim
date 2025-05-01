@@ -1,21 +1,21 @@
-use crate::{split_task, split_task_lenght};
+use crate::{split_task, split_task_length};
 use std::fmt::Debug;
 
 #[test]
 fn test_split_task_len() {
-    let res = split_task_lenght(4, 3);
+    let res = split_task_length(4, 3);
     let cor = vec![2, 1, 1];
     assert_eq!(res, cor);
-    let res = split_task_lenght(8, 3);
+    let res = split_task_length(8, 3);
     let cor = vec![3, 3, 2];
     assert_eq!(res, cor);
-    let res = split_task_lenght(7, 2);
+    let res = split_task_length(7, 2);
     let cor = vec![4, 3];
     assert_eq!(res, cor);
-    let res = split_task_lenght(7, 4);
+    let res = split_task_length(7, 4);
     let cor = vec![2, 2, 2, 1];
     assert_eq!(res, cor);
-    let res = split_task_lenght(3, 5);
+    let res = split_task_length(3, 5);
     let cor = vec![1, 1, 1, 0, 0];
     assert_eq!(res, cor);
 }

@@ -1,4 +1,4 @@
 [toolchain]
-channel = "1.63.0"
+channel = "1.64"
 #components = ["rustc", "cargo"]
 #targets = ["x86_64-pc-windows-gnu"]

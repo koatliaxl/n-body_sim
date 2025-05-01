@@ -2,3 +2,4 @@
 #N-body_sim.iml
 Cargo.lock
 #gl/bindings.rs
+.idea

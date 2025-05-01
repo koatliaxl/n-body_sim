@@ -102,13 +102,13 @@ fn move_bodies(changes: &mut Vec<Body>, forces: &Vec<Vector3<f64>>, delta_t: f64
 fn check_suspicion_hitboxes(bodies: &Vec<Body>, changes: &mut Vec<Body>, delta_t: f64) {
     for body in changes {
         for body_2 in bodies {
-            // ATTENTION! The next thing bellow might appear very murky on the first glance, but
+            // ATTENTION! The next thing bellow might appear very murky at the first glance, but
             // wait, before thinking or doing something, it will be explained bellow.
             //   This is to prevent of the duplicate collision (with reverse body IDs) for being
-            // added and tracked. For this, a some mechanism is needed that for the any pair
+            // added and tracked. For this, a some mechanism is needed that for any pair
             // of bodies IDs choose one order but not another. Compare is used, because "not equal"
             // check is already being used in this place, to prevent the collision check of
-            // the body with it self.
+            // the body with itself.
             if body.get_id() > body_2.get_id() {
                 let coord_diff = body_2.pos - body.pos;
                 let dot_prod = coord_diff % body.vel; // dot product
