@@ -7,8 +7,8 @@ pub use support::id_table::ObjectIdTable;
 
 pub const SIZE_OF_GL_FLOAT: isize = std::mem::size_of::<gl::types::GLfloat>() as isize;
 pub static SUSPECT_COLLISION_THRESHOLD: f64 = 0.1;
-pub static BODY_DENSITY_VALUE: f64 = 1.0;
-pub static BODY_RADIUS_OF_/* unit mass */:f64 = 0.4;
+pub static BODY_DENSITY_VALUE: f64 = 0.4;
+//pub static BODY_RADIUS_OF_/* unit mass */:f64 = 0.4;
 
 pub static mut ID_TABLE: ObjectIdTable = ObjectIdTable::new();
 
@@ -86,7 +86,7 @@ impl Body {
 
     pub fn calculate_radius(mass: f64) -> f64{
         use std::f64::consts::PI;
-        (mass * BODY_RADIUS_OF_ * BODY_DENSITY_VALUE / PI).sqrt()
+        (mass * BODY_DENSITY_VALUE / PI).sqrt()
     }
 
     pub fn get_id(&self) -> u64 {

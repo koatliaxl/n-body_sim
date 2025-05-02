@@ -37,7 +37,8 @@ pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32)) {
         let equation_val = (x - pos_on_scr.x()).powi(2) + (y - pos_on_scr.y()).powi(2);
         let radius = BODY_GFX_SCALE * o.get_radius() as f32;
         if equation_val < ( radius / state.view_scale * (w + h) / 2.0).powi(2) {
-            state.selected = o.get_id() as i64
+            state.selected = o.get_id() as i64;
+            println!("mass: {}", o.mass)
         }
     }
 }

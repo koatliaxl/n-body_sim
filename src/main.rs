@@ -73,15 +73,18 @@ fn main() {
             check_if_tasks_finished(&mut state);
         } else {
             update_world(&mut world);
+            apply_commands(&mut world, &mut state);
+            apply_collisions(&mut world);
             update_processed = true;
             state.received = 0
         }
         glfw.poll_events();
         handle_events(&mut window, &events, &mut state, &gl_data, &world);
-        if update_processed {
+        /*if tasks_done && !update_finished {
             apply_commands(&mut world, &mut state);
             apply_collisions(&mut world);
-        }
+            update_finished = true
+        }*/
     }
     for jh in state.workers {
         jh.join().expect("failed to join worker");

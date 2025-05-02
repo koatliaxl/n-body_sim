@@ -85,13 +85,14 @@ pub fn apply_collisions(world: &mut World) {
         .expect("Main: lock not acquired on bodies");
     for mir in &world.obj_mirror {
         let mut guard = mir.lock().expect("Main: lock not acquired on obj. buffer");
-        for (id, Collision { mass, vel }) in &mut guard.collisions {
+        for (id, Collision { mass, vel }) in guard.collisions.iter_mut() {
             'inner: for body in bodies.iter_mut() {
                 if *id == body.get_id() {
                     //let rel_vel = body.vel - *vel;
                     let momentum = *vel * *mass; // collision vel. is already relative
-                    body.vel += momentum * (1.0 / (*mass + body.mass));
+                    body.vel = momentum * (1.0 / (*mass + body.mass));
                     body.mass += *mass;
+                    //println!("collision applied");
                     body.update_radius();
                     break 'inner;
                 }

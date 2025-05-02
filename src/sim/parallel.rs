@@ -29,6 +29,7 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
                 .lock()
                 .expect("Worker: lock not acquired for parallel read");
 
+            collisions.clear();
             prepare_changes(&bodies, changes, task, begin);
             compute_forces(&bodies, changes, forces, /*task, begin,*/ collisions);
             check_suspicion_hitboxes(&bodies, changes, delta_t);
@@ -52,7 +53,7 @@ fn check_for_collisions(
     changes: &mut Vec<Body>,
     collisions: &mut HashMap<u64, Collision>,
 ) {
-    collisions.clear();
+    //collisions.clear();
     for body in changes {
         if let Some(body_2) = body.check_for_collision(bodies) {
             let diff = body.pos - body_2.pos;
@@ -135,7 +136,6 @@ fn compute_forces(
                     let rad_sqr = body.get_radius().powi(2);
                     if dist_sqr < rad_sqr && body.get_id() > body_2.get_id() {
                         add_to_collisions(collisions, body, body_2);
-                        //forces.push(total_force);
                         break 'l1;
                     }
                     //let dist = dist_sqr.sqrt();
@@ -157,8 +157,9 @@ fn add_to_collisions(collisions: &mut HashMap<u64, Collision>, body: &mut Body, 
         let rel_vel = to_body.vel - body.vel;
         let momentum_1 = *mass * *vel;
         let momentum_2 = rel_vel * body.mass;
-        *vel = (momentum_1 + momentum_2) * (1.0 / (*mass * body.mass));
+        *vel = (momentum_1 + momentum_2) * (1.0 / (*mass + body.mass));
         *mass += body.mass;
+        //println!("total mass: {}", *mass)
     } else {
         collisions.insert(
             to_body.get_id(),
@@ -167,7 +168,8 @@ fn add_to_collisions(collisions: &mut HashMap<u64, Collision>, body: &mut Body, 
                 vel: to_body.vel - body.vel,
             },
         );
+        //println!("total mass: {}", body.mass)
     }
     body.class = Removed;
-    println!("collision happened")
+    //println!("collision happened")
 }
