@@ -55,11 +55,14 @@ fn check_for_collisions(
 ) {
     //collisions.clear();
     for body in changes {
-        if let Some(body_2) = body.check_for_collision(bodies) {
-            let diff = body.pos - body_2.pos;
-            let dist = diff.length();
-            if dist < body.get_radius() {
-                add_to_collisions(collisions, body, body_2)
+        if body.class != Removed {
+            if let Some(body_2) = body.check_for_collision(bodies) {
+                let diff = body.pos - body_2.pos;
+                let dist = diff.length();
+                if dist < body.get_radius() {
+                    add_to_collisions(collisions, body, body_2);
+                    println!("late collision happened")
+                }
             }
         }
     }
@@ -81,27 +84,31 @@ fn move_bodies(changes: &mut Vec<Body>, forces: &Vec<Vector3<f64>>, delta_t: f64
 
 fn check_suspicion_hitboxes(bodies: &Vec<Body>, changes: &mut Vec<Body>, delta_t: f64) {
     for body in changes {
-        for body_2 in bodies {
-            // ATTENTION! The next thing bellow might appear very murky at the first glance, but
-            // wait, before thinking or doing something, it will be explained bellow.
-            //   This is to prevent of the duplicate collision (with reverse body IDs) for being
-            // added and tracked. For this, a some mechanism is needed that for any pair
-            // of bodies IDs choose one order but not another. Compare is used, because "not equal"
-            // check is already being used in this place, to prevent the collision check of
-            // the body with itself.
-            if body.get_id() > body_2.get_id() {
-                let coord_diff = body_2.pos - body.pos;
-                let dot_prod = coord_diff % body.vel; // dot product
-                if dot_prod > 0.0 {
-                    // = body in some degree shortens distance
-                    let diff = coord_diff - body.vel;
-                    // if velocity is comparable to distance:
-                    if diff.x() < body.vel.x() || diff.y() < body.vel.y() {
-                        body.suspect_collision(delta_t, body_2.get_id(), Increase);
-                    } /*else {
+        if body.class != Removed {
+            for body_2 in bodies {
+                if body_2.class != Removed {
+                    // ATTENTION! The next thing bellow might appear very murky at the first glance, but
+                    // wait, before thinking or doing something, it will be explained bellow.
+                    //   This is to prevent of the duplicate collision (with reverse body IDs) for being
+                    // added and tracked. For this, a some mechanism is needed that for any pair
+                    // of bodies IDs choose one order but not another. Compare is used, because "not equal"
+                    // check is already being used in this place, to prevent the collision check of
+                    // the body with itself.
+                    if body.get_id() > body_2.get_id() {
+                        let coord_diff = body_2.pos - body.pos;
+                        let dot_prod = coord_diff % body.vel; // dot product
+                        if dot_prod > 0.0 {
+                            // = body in some degree shortens distance
+                            let diff = coord_diff - body.vel;
+                            // if velocity is comparable to distance:
+                            if diff.x() < body.vel.x() || diff.y() < body.vel.y() {
+                                body.suspect_collision(delta_t, body_2.get_id(), Increase);
+                            } /*else {
                       }*/
-                } else {
-                    body.suspect_collision(delta_t, body_2.get_id(), Decrease);
+                        } else {
+                            body.suspect_collision(delta_t, body_2.get_id(), Decrease);
+                        }
+                    }
                 }
             }
         }
@@ -119,13 +126,10 @@ fn compute_forces(
     bodies: &Vec<Body>,
     changes: &mut Vec<Body>,
     forces: &mut Vec<Vector3<f64>>,
-    /*task: usize,
-    begin: usize,*/
     collisions: &mut HashMap<u64, Collision>,
 ) {
     forces.clear();
     for body in changes {
-        //let body = &bodies[i];
         if body.class == Massive || body.class == Light {
             let mut total_force = Vector3::default();
             'l1: for j in 0..bodies.len() {
@@ -134,11 +138,12 @@ fn compute_forces(
                     let displacement = body.pos - body_2.pos;
                     let dist_sqr = displacement.x().powi(2) + displacement.y().powi(2);
                     let rad_sqr = body.get_radius().powi(2);
+                    // "body id > body_2 id" explained higher
                     if dist_sqr < rad_sqr && body.get_id() > body_2.get_id() {
                         add_to_collisions(collisions, body, body_2);
+                        println!("early collision happened");
                         break 'l1;
                     }
-                    //let dist = dist_sqr.sqrt();
                     let dir = -displacement.normalize();
                     total_force += dir * body.mass * body_2.mass * (1.0 / dist_sqr);
                 }
@@ -159,7 +164,7 @@ fn add_to_collisions(collisions: &mut HashMap<u64, Collision>, body: &mut Body, 
         let momentum_2 = rel_vel * body.mass;
         *vel = (momentum_1 + momentum_2) * (1.0 / (*mass + body.mass));
         *mass += body.mass;
-        //println!("total mass: {}", *mass)
+        println!("collision mass: {}", *mass)
     } else {
         collisions.insert(
             to_body.get_id(),
@@ -168,8 +173,7 @@ fn add_to_collisions(collisions: &mut HashMap<u64, Collision>, body: &mut Body, 
                 vel: to_body.vel - body.vel,
             },
         );
-        //println!("total mass: {}", body.mass)
+        println!("collision mass: {}", body.mass)
     }
     body.class = Removed;
-    //println!("collision happened")
 }
