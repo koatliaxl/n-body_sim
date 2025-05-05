@@ -85,14 +85,16 @@ fn check_suspicion_hitboxes(bodies: &Vec<Body>, changes: &mut Vec<Body>, delta_t
         if body.class != Removed {
             for body_2 in bodies {
                 if body_2.class != Removed {
-                    // ATTENTION! The next thing bellow might appear very murky at the first glance, but
-                    // wait, before thinking or doing something, it will be explained bellow.
-                    //   This is to prevent of the duplicate collision (with reverse body IDs) for being
-                    // added and tracked. For this, a some mechanism is needed that for any pair
-                    // of bodies IDs choose one order but not another. Compare is used, because "not equal"
-                    // check is already being used in this place, to prevent the collision check of
-                    // the body with itself.
-                    if body.get_id() > body_2.get_id() {
+                    if body.mass < body_2.mass
+                        // ATTENTION! The next thing bellow might appear very murky at the first glance, but
+                        // wait, before thinking or doing something, it will be explained bellow.
+                        //   This is to prevent of the duplicate collision (with reverse body IDs) for being
+                        // added and tracked. For this, a some mechanism is needed that for any pair
+                        // of bodies IDs choose one order but not another. Compare is used, because "not equal"
+                        // check is already being used in this place, to prevent the collision check of
+                        // the body with itself.
+                        || (body.mass == body_2.mass && body.get_id() > body_2.get_id())
+                    {
                         let coord_diff = body_2.pos - body.pos;
                         let dot_prod = coord_diff % body.vel; // dot product
                         if dot_prod > 0.0 {
@@ -141,9 +143,15 @@ fn compute_forces(
                     let displacement = body.pos - body_2.pos;
                     let dist_sqr = displacement.x().powi(2) + displacement.y().powi(2);
                     let rad_sqr = body.get_radius().powi(2);
-                    // "body id > body_2 id" explained above
-                    if dist_sqr < rad_sqr && body.get_id() > body_2.get_id() {
-                        add_to_collisions(collisions, body, body_2);
+                    if dist_sqr < rad_sqr {
+                        if body.mass < body_2.mass {
+                            add_to_collisions(collisions, body, body_2);
+                        } else if body.mass == body_2.mass {
+                            // "body id > body_2 id" explained above
+                            if body.get_id() > body_2.get_id() {
+                                add_to_collisions(collisions, body, body_2);
+                            }
+                        }
                         //println!("early collision happened");
                         break 'l1;
                     }
