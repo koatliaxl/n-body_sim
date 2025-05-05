@@ -1,5 +1,4 @@
 use self::SuspectCollChange::*;
-use self::SuspectedCollision::*;
 use mat_vec::Vector3;
 use std::collections::HashMap;
 
@@ -8,7 +7,6 @@ pub use support::id_table::ObjectIdTable;
 pub const SIZE_OF_GL_FLOAT: isize = std::mem::size_of::<gl::types::GLfloat>() as isize;
 pub static SUSPECT_COLLISION_THRESHOLD: f64 = 0.1;
 pub static BODY_DENSITY_VALUE: f64 = 0.4;
-//pub static BODY_RADIUS_OF_/* unit mass */:f64 = 0.4;
 
 pub static mut ID_TABLE: ObjectIdTable = ObjectIdTable::new();
 
@@ -47,15 +45,18 @@ pub struct Collision {
 }
 
 #[derive(PartialEq, Copy, Clone)]
-pub enum SuspectedCollision {
-    Suspected { meter: f64 },
+pub struct SuspectedCollision {
+    meter: f64,
 }
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum SuspectCollChange {
     Increase,
     Decrease,
-    Stagnant,
+    SlightIncrease,
+    SlightDecrease,
+    MoreDecrease,
+    //Stagnant,
 }
 
 impl Body {
@@ -67,7 +68,7 @@ impl Body {
             class: BodyType::Massive,
             id: unsafe { ID_TABLE.take_new_id() },
             suspect_for_collision: HashMap::new(),
-            phys_radius: Self::calculate_radius(mass)
+            phys_radius: Self::calculate_radius(mass),
         }
     }
 
@@ -80,11 +81,11 @@ impl Body {
             class,
             id,
             suspect_for_collision: HashMap::new(),
-            phys_radius: Self::calculate_radius(mass)
+            phys_radius: Self::calculate_radius(mass),
         }
     }
 
-    pub fn calculate_radius(mass: f64) -> f64{
+    pub fn calculate_radius(mass: f64) -> f64 {
         use std::f64::consts::PI;
         (mass * BODY_DENSITY_VALUE / PI).sqrt()
     }
@@ -103,8 +104,7 @@ impl Body {
 
     pub fn check_for_collision<'a>(&self, bodies: &'a Vec<Body>) -> Option<&'a Body> {
         for (id, coll) in &self.suspect_for_collision {
-            let Suspected { meter } = coll;
-            if *meter >= SUSPECT_COLLISION_THRESHOLD {
+            if coll.meter >= SUSPECT_COLLISION_THRESHOLD {
                 for body_2 in bodies {
                     if *id == body_2.id {
                         return Some(&body_2);
@@ -115,21 +115,17 @@ impl Body {
         None
     }
 
-    /*pub fn get_suspected_collisions(&mut self) -> &mut HashMap<u64, SuspectedCollision> {
-        &mut self.suspect_for_collision
-    }*/
-
     pub fn suspect_collision(&mut self, delta_t: f64, body_id: u64, sus_change: SuspectCollChange) {
         if let Some(suspect) = self.suspect_for_collision.get_mut(&body_id) {
-            let Suspected { meter, .. } = suspect;
-            *meter += delta_t * sus_change.value();
-            if *meter < 0.0 {
+            //let Suspected { meter, .. } = suspect;
+            suspect.meter += delta_t * sus_change.value();
+            if suspect.meter < 0.0 {
                 self.suspect_for_collision.remove(&body_id);
             }
         } else {
             self.suspect_for_collision.insert(
                 body_id,
-                Suspected {
+                SuspectedCollision {
                     meter: delta_t * sus_change.value(),
                 },
             );
@@ -142,7 +138,10 @@ impl SuspectCollChange {
         match self {
             Increase => 1.0,
             Decrease => -1.0,
-            Stagnant => 0.0,
+            //Stagnant => 0.0,
+            SlightDecrease => -0.5,
+            SlightIncrease => 0.5,
+            MoreDecrease => -2.0,
         }
     }
 }
@@ -160,7 +159,7 @@ impl Clone for Body {
                 .iter()
                 .map(|(id, coll)| (*id, coll.clone()))
                 .collect::<HashMap<u64, SuspectedCollision>>(),
-            phys_radius: self.phys_radius
+            phys_radius: self.phys_radius,
         }
     }
 }

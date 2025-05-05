@@ -1,10 +1,9 @@
-use crate::{Msg, ObjBuffer, ThreadConfig, /*BODY_RADIUS, BODY_RADIUS_SQR*/};
+use crate::{Msg, ObjBuffer, ThreadConfig};
 use mat_vec::Vector3;
 use n_body_sim::BodyType::*;
 use n_body_sim::{Body, Collision};
 use std::collections::HashMap;
 //use std::sync::mpsc::{Receiver, Sender};
-//use n_body_sim::Collision::*;
 use n_body_sim::SuspectCollChange::*;
 use std::sync::{Arc, Mutex};
 
@@ -53,7 +52,6 @@ fn check_for_collisions(
     changes: &mut Vec<Body>,
     collisions: &mut HashMap<u64, Collision>,
 ) {
-    //collisions.clear();
     for body in changes {
         if body.class != Removed {
             if let Some(body_2) = body.check_for_collision(bodies) {
@@ -61,7 +59,7 @@ fn check_for_collisions(
                 let dist = diff.length();
                 if dist < body.get_radius() {
                     add_to_collisions(collisions, body, body_2);
-                    println!("late collision happened")
+                    //println!("late collision happened")
                 }
             }
         }
@@ -101,12 +99,17 @@ fn check_suspicion_hitboxes(bodies: &Vec<Body>, changes: &mut Vec<Body>, delta_t
                             // = body in some degree shortens distance
                             let diff = coord_diff - body.vel;
                             // if velocity is comparable to distance:
-                            if diff.x() < body.vel.x() || diff.y() < body.vel.y() {
-                                body.suspect_collision(delta_t, body_2.get_id(), Increase);
-                            } /*else {
-                      }*/
+                            if diff.x() < body.vel.x() && diff.y() < body.vel.y() {
+                                body.suspect_collision(delta_t, body_2.get_id(), Increase)
+                            } else if diff.x() < body.vel.x() || diff.y() < body.vel.y() {
+                                body.suspect_collision(delta_t, body_2.get_id(), SlightIncrease);
+                            }
+                        } else if body.vel.x() < coord_diff.x() && body.vel.y() < coord_diff.y() {
+                            body.suspect_collision(delta_t, body_2.get_id(), SlightDecrease);
+                        } else if body.vel.x() < coord_diff.x() || body.vel.y() < coord_diff.y() {
+                            body.suspect_collision(delta_t, body_2.get_id(), Decrease)
                         } else {
-                            body.suspect_collision(delta_t, body_2.get_id(), Decrease);
+                            body.suspect_collision(delta_t, body_2.get_id(), MoreDecrease);
                         }
                     }
                 }
@@ -138,10 +141,10 @@ fn compute_forces(
                     let displacement = body.pos - body_2.pos;
                     let dist_sqr = displacement.x().powi(2) + displacement.y().powi(2);
                     let rad_sqr = body.get_radius().powi(2);
-                    // "body id > body_2 id" explained higher
+                    // "body id > body_2 id" explained above
                     if dist_sqr < rad_sqr && body.get_id() > body_2.get_id() {
                         add_to_collisions(collisions, body, body_2);
-                        println!("early collision happened");
+                        //println!("early collision happened");
                         break 'l1;
                     }
                     let dir = -displacement.normalize();
@@ -164,7 +167,7 @@ fn add_to_collisions(collisions: &mut HashMap<u64, Collision>, body: &mut Body, 
         let momentum_2 = rel_vel * body.mass;
         *vel = (momentum_1 + momentum_2) * (1.0 / (*mass + body.mass));
         *mass += body.mass;
-        println!("collision mass: {}", *mass)
+        //println!("collision mass: {}", *mass)
     } else {
         collisions.insert(
             to_body.get_id(),
@@ -173,7 +176,7 @@ fn add_to_collisions(collisions: &mut HashMap<u64, Collision>, body: &mut Body, 
                 vel: to_body.vel - body.vel,
             },
         );
-        println!("collision mass: {}", body.mass)
+        //println!("collision mass: {}", body.mass)
     }
     body.class = Removed;
 }
