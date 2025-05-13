@@ -10,8 +10,7 @@ build = "gl/build.rs"
 gl_generator = "0.14.0"
 
 [dependencies]
-#glutin = "0.24.1"
-#winit = "0.19.2"
+freetype-rs = {version = "0.38.0", features = ["bundled"]}
 
 [dependencies.glfw]
 #git = "https://github.com/bjz/glfw-rs.git"

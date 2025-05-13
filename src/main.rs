@@ -1,3 +1,4 @@
+use crate::draw::draw_text;
 use crate::world::init_world;
 use draw::draw;
 use glfw::Context;

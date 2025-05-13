@@ -3,6 +3,10 @@ use mat_vec::{Matrix4x4, Vector3};
 use n_body_sim::gl;
 //use std::f32::consts::PI;
 
+pub use gui::*;
+
+pub mod gui;
+
 pub static BODY_GFX_SCALE: f32 = 0.4;
 
 pub unsafe fn draw(gl_res: &GlData, world: &World, state: &State) {
