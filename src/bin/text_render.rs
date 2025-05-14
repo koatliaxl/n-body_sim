@@ -1,8 +1,7 @@
 use freetype as ft;
 use std::io::stdin;
 
-//const WIDTH: i32 = 48 * 1;
-//const HEIGHT: i32 = 32 * 1;
+static ASKII_ASPECT_RATIO: usize = 2; // to compensate width to height ratio of console character
 
 fn main() {
     let library = ft::Library::init().unwrap();
@@ -45,15 +44,15 @@ fn main() {
     }
 
     let glyph = face.glyph();
-    /*let x = glyph.bitmap_left() + 5;
-    let y = HEIGHT - glyph.bitmap_top() - 8 * size as i32;*/
 
-    let figure = draw_bitmap(glyph.bitmap() /*, x, y*/);
+    //let figure = draw_bitmap(glyph.bitmap());
     let mapping = b" .:-;+*x#@";
     let mapping_scale = (mapping.len() - 1) as f32;
-    for i in 0..figure.len() {
-        for j in 0..figure[i].len() {
-            let v = figure[i][j];
+
+    let w = (glyph.bitmap().width() * ASKII_ASPECT_RATIO) as usize;
+    for i in 0..glyph.bitmap().rows() as usize {
+        for j in 0..w {
+            let v = glyph.bitmap().buffer()[(i * w + j) / ASKII_ASPECT_RATIO];
             let i = ((v as f32 / 256.0) * mapping_scale + 0.5) as usize;
             // '$' in the output if something wrong
             let c = mapping.get(i).cloned().unwrap_or(b'$') as char;
@@ -63,11 +62,9 @@ fn main() {
     }
 }
 
-fn draw_bitmap(bitmap: ft::Bitmap /*, _x: i32, _y: i32*/) -> Vec<Vec<u8>> {
+/*fn draw_bitmap(bitmap: ft::Bitmap) -> Vec<Vec<u8>> {
     let mut figure = Vec::new();
     let w = (bitmap.width() * 2) as usize;
-    //let x_max = w;
-    //let y_max = bitmap.rows() as usize;
     for i in 0..bitmap.rows() as usize {
         let mut row = Vec::new();
         for j in 0..w {
@@ -77,4 +74,4 @@ fn draw_bitmap(bitmap: ft::Bitmap /*, _x: i32, _y: i32*/) -> Vec<Vec<u8>> {
         figure.push(row)
     }
     figure
-}
+}*/
