@@ -7,14 +7,13 @@ fn main() {
     let library = ft::Library::init().unwrap();
     let face = library.new_face("assets/Lexend-Regular.ttf", 0).unwrap();
 
-    println!("Enter symbol to draw and/or size multiplier:");
+    println!("Enter symbol to draw and/or resolution multiplier:");
     let mut input = String::new();
     stdin()
         .read_line(&mut input)
         .expect("Error while trying read input");
     let mut size = 1;
     let mut chars = input.chars();
-
     if let Some(ch) = chars.next() {
         match ch {
             '!'..='~' => {
@@ -42,14 +41,11 @@ fn main() {
             _ => println!("Please, enter a printable character"),
         }
     }
-
     let glyph = face.glyph();
-
-    //let figure = draw_bitmap(glyph.bitmap());
     let mapping = b" .:-;+*x#@";
     let mapping_scale = (mapping.len() - 1) as f32;
+    let w = glyph.bitmap().width() as usize * ASKII_ASPECT_RATIO;
 
-    let w = (glyph.bitmap().width() * ASKII_ASPECT_RATIO) as usize;
     for i in 0..glyph.bitmap().rows() as usize {
         for j in 0..w {
             let v = glyph.bitmap().buffer()[(i * w + j) / ASKII_ASPECT_RATIO];
@@ -61,17 +57,3 @@ fn main() {
         println!()
     }
 }
-
-/*fn draw_bitmap(bitmap: ft::Bitmap) -> Vec<Vec<u8>> {
-    let mut figure = Vec::new();
-    let w = (bitmap.width() * 2) as usize;
-    for i in 0..bitmap.rows() as usize {
-        let mut row = Vec::new();
-        for j in 0..w {
-            let v = bitmap.buffer()[(i * w + j) / 2];
-            row.push(v);
-        }
-        figure.push(row)
-    }
-    figure
-}*/
