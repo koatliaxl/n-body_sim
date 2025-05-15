@@ -1,7 +1,7 @@
 use freetype as ft;
 use std::io::stdin;
 
-static ASKII_ASPECT_RATIO: usize = 2; // to compensate width to height ratio of console character
+static ASKII_ASPECT_RATIO: usize = 2; // to compensate width to height ratio of console characters
 
 fn main() {
     let library = ft::Library::init().unwrap();

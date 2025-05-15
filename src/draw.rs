@@ -5,7 +5,7 @@ use n_body_sim::gl;
 
 pub use gui::*;
 
-pub mod gui;
+pub mod text;
 
 pub static BODY_GFX_SCALE: f32 = 0.4;
 

@@ -1,8 +1,10 @@
 pub mod draw;
 pub mod shader;
+pub mod text;
 pub mod world;
 
 pub use draw::init_draw;
+pub use text::*;
 
 use super::gl;
 #[allow(unused_imports)]
@@ -92,18 +94,40 @@ pub fn init_shaders(gl_data: &mut GlData) {
             FRAGMENT_SHADER,
             "Object fragment shader",
         );
-        let shd_program = gen_shader_program(obj_vertex, obj_frag, "Object shader");
+        let obj_shader = gen_shader_program(obj_vertex, obj_frag, "Object shader");
         /*let shd_program =
         gen_geometry_shader_program(obj_vertex, obj_geom, obj_frag, "Object shader");*/
-        gl_data.add_shader_gl_id("Object shader", shd_program);
-        let view_mat = gl::GetUniformLocation(shd_program, "view_mat\0".as_ptr() as *const i8);
-        let model_mat = gl::GetUniformLocation(shd_program, "model_mat\0".as_ptr() as *const i8);
-        let proj_mat = gl::GetUniformLocation(shd_program, "proj_mat\0".as_ptr() as *const i8);
+        gl_data.add_shader_gl_id("Object shader", obj_shader);
+        let view_mat = gl::GetUniformLocation(obj_shader, "view_mat\0".as_ptr() as *const i8);
+        let model_mat = gl::GetUniformLocation(obj_shader, "model_mat\0".as_ptr() as *const i8);
+        let proj_mat = gl::GetUniformLocation(obj_shader, "proj_mat\0".as_ptr() as *const i8);
         gl_data.add_variable_location("Object shader", "view_mat", view_mat);
         gl_data.add_variable_location("Object shader", "model_mat", model_mat);
         gl_data.add_variable_location("Object shader", "proj_mat", proj_mat);
+
+        let text_vertex = gen_shader_from_file(
+            "shaders/text_vertex.glsl",
+            VERTEX_SHADER,
+            "Text vertex shader",
+        );
+        let text_frag = gen_shader_from_file(
+            "shaders/text_frag.glsl",
+            FRAGMENT_SHADER,
+            "Text fragment shader",
+        );
+        let text_shader = gen_shader_program(text_vertex, text_frag, "Text shader");
+        let proj_mat = gl::GetUniformLocation(obj_shader, "proj_mat\0".as_ptr() as *const i8);
+        let glyph = gl::GetUniformLocation(obj_shader, "glyph\0".as_ptr() as *const i8);
+        let text_color = gl::GetUniformLocation(obj_shader, "text_color\0".as_ptr() as *const i8);
+        gl_data.add_shader_gl_id("Text shader", text_shader);
+        gl_data.add_variable_location("Text shader", "proj_mat", proj_mat);
+        gl_data.add_variable_location("Text shader", "glyph", glyph);
+        gl_data.add_variable_location("Text shader", "text_color", text_color);
+
         gl::DeleteShader(obj_vertex);
         //gl::DeleteShader(obj_geom);
         gl::DeleteShader(obj_frag);
+        gl::DeleteShader(text_vertex);
+        gl::DeleteShader(text_frag);
     }
 }

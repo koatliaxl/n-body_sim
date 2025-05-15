@@ -51,3 +51,23 @@ pub unsafe fn init_draw(gl_data: &mut GlData) {
     gl_data.add_vertex_array_gl_id("Only Position", vertex_array);
     gl_data.add_vertex_buffer_gl_id("3 Points", vertex_buf)
 }
+
+pub unsafe fn init_obj(gl_data: &mut GlData) {}
+
+pub unsafe fn init_quad(gl_data: &mut GlData) {
+    let quad_vertices = [-1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0];
+
+    let mut vertex_buf = 0;
+    gl::GenBuffers(1, &mut vertex_buf);
+    gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);
+    gl::BufferData(
+        gl::ARRAY_BUFFER,
+        vertices.len() as isize * SIZE_OF_GL_FLOAT,
+        vertices.as_ptr() as *const c_void,
+        gl::STATIC_DRAW,
+    );
+
+    let mut vertex_array = 0;
+    gl::GenVertexArrays(1, &mut vertex_array);
+    gl::BindVertexArray(vertex_array);
+}
