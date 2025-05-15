@@ -33,7 +33,7 @@ fn main() {
     let mut world = init_world(num_of_threads);
     unsafe {
         init_draw(&mut gl_data);
-        init_glyphs(&mut state, &mut gl_data)
+        init_glyphs(&mut gl_data)
     }
     let mut state = State::new(&world.obj_mirror);
 

@@ -5,16 +5,11 @@ use n_body_sim::SIZE_OF_GL_FLOAT;
 use std::ffi::c_void;
 
 pub unsafe fn init_draw(gl_data: &mut GlData) {
-    /*gl::VertexAttribPointer(
-        1,
-        color_attrib_len,
-        gl::FLOAT,
-        gl::FALSE,
-        SIZE_OF_GL_FLOAT as i32 * (position_attrib_len + color_attrib_len),
-        (SIZE_OF_GL_FLOAT * position_attrib_len as isize) as *const c_void,
-    );
-    gl::EnableVertexAttribArray(1);*/
+    init_obj(gl_data);
+    init_quad(gl_data)
+}
 
+pub unsafe fn init_obj(gl_data: &mut GlData) {
     use std::f32::consts::PI;
     let mut vertices = [0.0_f32; 32];
     for ang in 0..16 {
@@ -49,10 +44,8 @@ pub unsafe fn init_draw(gl_data: &mut GlData) {
     );
     gl::EnableVertexAttribArray(0);
     gl_data.add_vertex_array_gl_id("Only Position", vertex_array);
-    gl_data.add_vertex_buffer_gl_id("3 Points", vertex_buf)
+    gl_data.add_vertex_buffer_gl_id("Circle", vertex_buf)
 }
-
-pub unsafe fn init_obj(gl_data: &mut GlData) {}
 
 pub unsafe fn init_quad(gl_data: &mut GlData) {
     let quad_vertices = [-1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0];
@@ -62,12 +55,35 @@ pub unsafe fn init_quad(gl_data: &mut GlData) {
     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);
     gl::BufferData(
         gl::ARRAY_BUFFER,
-        vertices.len() as isize * SIZE_OF_GL_FLOAT,
-        vertices.as_ptr() as *const c_void,
+        quad_vertices.len() as isize * SIZE_OF_GL_FLOAT,
+        quad_vertices.as_ptr() as *const c_void,
         gl::STATIC_DRAW,
     );
 
     let mut vertex_array = 0;
     gl::GenVertexArrays(1, &mut vertex_array);
     gl::BindVertexArray(vertex_array);
+    let position_attrib_len = 2;
+    let tex_coord_attrib_len = 2;
+    gl::VertexAttribPointer(
+        0,
+        position_attrib_len,
+        gl::FLOAT,
+        gl::FALSE,
+        SIZE_OF_GL_FLOAT as i32 * (position_attrib_len + tex_coord_attrib_len),
+        0 as *const c_void,
+    );
+    gl::EnableVertexAttribArray(0);
+    gl::VertexAttribPointer(
+        1,
+        tex_coord_attrib_len,
+        gl::FLOAT,
+        gl::FALSE,
+        SIZE_OF_GL_FLOAT as i32 * (position_attrib_len + tex_coord_attrib_len),
+        (SIZE_OF_GL_FLOAT * position_attrib_len as isize) as *const c_void,
+    );
+    gl::EnableVertexAttribArray(1);
+
+    gl_data.add_vertex_buffer_gl_id("Quad", vertex_buf);
+    gl_data.add_vertex_array_gl_id("Position and texture", vertex_array);
 }

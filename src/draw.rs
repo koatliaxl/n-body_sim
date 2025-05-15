@@ -3,7 +3,7 @@ use mat_vec::{Matrix4x4, Vector3};
 use n_body_sim::gl;
 //use std::f32::consts::PI;
 
-pub use gui::*;
+pub use text::*;
 
 pub mod text;
 
@@ -14,7 +14,7 @@ pub unsafe fn draw(gl_res: &GlData, world: &World, state: &State) {
     gl::Clear(gl::COLOR_BUFFER_BIT);
     let shader = gl_res.get_shader_gl_id("Object shader");
     gl::UseProgram(shader);
-    let vertex_buf = gl_res.get_vertex_buffer_gl_id("3 Points");
+    let vertex_buf = gl_res.get_vertex_buffer_gl_id("Circle");
     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);
     let vertex_arr = gl_res.get_vertex_array_gl_id("Only Position");
     gl::BindVertexArray(vertex_arr);
