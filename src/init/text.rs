@@ -42,11 +42,11 @@ pub fn init_glyphs(gl_data: &mut GlData) {
         );
         let bearing = Vector3::new(face.glyph().bitmap_left(), face.glyph().bitmap_top(), 0);
         let glyph = Glyph {
-            ch,
+            symbol: ch,
             texture_id,
             size,
             bearing,
-            advance: face.glyph().advance().x as u32,
+            advance: face.glyph().advance().x,
         };
         gl_data.add_glyph(glyph)
     }

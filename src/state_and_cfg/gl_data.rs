@@ -17,7 +17,7 @@ pub struct Glyph {
     pub texture_id: u32,
     pub size: Vector3<i32>,
     pub bearing: Vector3<i32>,
-    pub advance: u32,
+    pub advance: i32,
 }
 
 impl GlData {
@@ -98,7 +98,7 @@ impl GlData {
     pub fn get_glyph(&self, char: char) -> Glyph {
         for glyph in &self.glyphs {
             if glyph.symbol == char {
-                *glyph
+                return *glyph
             }
         }
         panic!("There is on glyph for: {}", char)

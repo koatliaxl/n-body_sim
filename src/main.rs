@@ -49,7 +49,7 @@ fn main() {
         }
         let since_last_frame = last_frame_time.elapsed();
         if since_last_frame.as_secs_f64() * 1000.0 >= between_frames || state.run_state != Stop {
-            draw(&gl_data, &world, &state);
+            draw(&gl_data, &world, &state, window.get_size());
             window.swap_buffers();
             last_frame_time = Instant::now();
         }

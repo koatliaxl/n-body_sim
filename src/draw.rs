@@ -9,7 +9,7 @@ pub mod text;
 
 pub static BODY_GFX_SCALE: f32 = 0.4;
 
-pub fn draw(gl_res: &GlData, world: &World, state: &State) {
+pub fn draw(gl_res: &GlData, world: &World, state: &State, window_size: (i32, i32)) {
     unsafe {
         gl::ClearColor(0.2, 0.1, 0.5, 1.0);
         gl::Clear(gl::COLOR_BUFFER_BIT);
@@ -17,7 +17,7 @@ pub fn draw(gl_res: &GlData, world: &World, state: &State) {
         gl::PointSize(3.0);
 
         draw_bodies(gl_res, world, state);
-        draw_text(gl_res, world, state);
+        draw_text(gl_res, world, state, window_size);
     }
 }
 
