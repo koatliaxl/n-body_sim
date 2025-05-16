@@ -4,9 +4,11 @@ use crate::GlData;
 use n_body_sim::SIZE_OF_GL_FLOAT;
 use std::ffi::c_void;
 
-pub unsafe fn init_draw(gl_data: &mut GlData) {
-    init_obj(gl_data);
-    init_quad(gl_data)
+pub fn init_draw(gl_data: &mut GlData) {
+    unsafe {
+        init_obj(gl_data);
+        init_quad(gl_data)
+    }
 }
 
 pub unsafe fn init_obj(gl_data: &mut GlData) {

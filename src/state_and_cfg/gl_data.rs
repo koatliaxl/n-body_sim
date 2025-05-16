@@ -11,7 +11,9 @@ pub struct GlData {
     glyphs: Vec<Glyph>,
 }
 
+#[derive(Copy, Clone)]
 pub struct Glyph {
+    pub symbol: char,
     pub texture_id: u32,
     pub size: Vector3<i32>,
     pub bearing: Vector3<i32>,
@@ -91,6 +93,15 @@ impl GlData {
 
     pub fn add_glyph(&mut self, glyph: Glyph) {
         self.glyphs.push(glyph)
+    }
+
+    pub fn get_glyph(&self, char: char) -> Glyph {
+        for glyph in &self.glyphs {
+            if glyph.symbol == char {
+                *glyph
+            }
+        }
+        panic!("There is on glyph for: {}", char)
     }
 
     #[allow(dead_code)]

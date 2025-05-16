@@ -19,9 +19,16 @@ pub fn view_pos_changed(gl_res: &GlData, state: &mut State, window_size: (i32, i
         Vector3::new(0.0, 1.0, 0.0),
     );
     unsafe {
-        let shader = gl_res.get_shader_gl_id("Object shader");
-        gl::UseProgram(shader);
+        let body_shader = gl_res.get_shader_gl_id("Object shader");
+        gl::UseProgram(body_shader);
         gl_res.set_uniform_mat4x4("view_mat", "Object shader", &view_mat);
+
+        let text_shader = gl_res.get_shader_gl_id("Text shader");
+        gl::UseProgram(text_shader);
+        let proj_mat = Matrix4x4::<f32>::new_perspective_projection_by_dimensions(
+            w as f32, 0.0, h as f32, 0.0, 1.0, 0.1,
+        );
+        gl_res.set_uniform_mat4x4("proj_mat", "Text shader", &proj_mat);
     }
 }
 

@@ -42,6 +42,7 @@ pub fn init_glyphs(gl_data: &mut GlData) {
         );
         let bearing = Vector3::new(face.glyph().bitmap_left(), face.glyph().bitmap_top(), 0);
         let glyph = Glyph {
+            ch,
             texture_id,
             size,
             bearing,
