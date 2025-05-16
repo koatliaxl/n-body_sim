@@ -19,16 +19,19 @@ pub unsafe fn draw_text(gl_res: &GlData, _world: &World, _state: &State, window_
     let mut pos_x = 40; // in pixels
     let pos_y = 150;
     for ch in text.chars() {
-        let glyph = gl_res.get_glyph(ch);
-        let rel_w = glyph.size.x() / window_size.0;
-        let rel_h = glyph.size.y() / window_size.1;
-        let scaling = Matrix4x4::new_scaling(rel_w as f32, rel_h as f32, 0.0);
-        let rel_pos_x = (pos_x + glyph.bearing.x()) / window_size.0;
-        let rel_pos_y = (pos_y + glyph.bearing.y()) / window_size.1;
-        let translation = Matrix4x4::new_translation(rel_pos_x as f32, rel_pos_y as f32, 0.0);
-        let pos_mat = translation * scaling;
-        gl_res.set_uniform_mat4x4("pos_mat", "Text shader", &pos_mat);
-        pos_x += glyph.advance;
-        gl::DrawArrays(gl::TRIANGLE_STRIP, 0, 6);
+        if let Some(glyph) = gl_res.get_glyph(ch) {
+            let rel_w = glyph.size.x() / window_size.0;
+            let rel_h = glyph.size.y() / window_size.1;
+            let scaling = Matrix4x4::new_scaling(rel_w as f32, rel_h as f32, 0.0);
+            let rel_pos_x = (pos_x + glyph.bearing.x()) / window_size.0;
+            let rel_pos_y = (pos_y + glyph.bearing.y()) / window_size.1;
+            let translation = Matrix4x4::new_translation(rel_pos_x as f32, rel_pos_y as f32, 0.0);
+            let pos_mat = translation * scaling;
+            gl_res.set_uniform_mat4x4("pos_mat", "Text shader", &pos_mat);
+            pos_x += glyph.advance;
+            gl::ActiveTexture(gl::TEXTURE0);
+            gl::BindTexture(gl::TEXTURE_2D, glyph.texture_id);
+            gl::DrawArrays(gl::TRIANGLE_STRIP, 0, 6);
+        }
     }
 }
