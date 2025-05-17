@@ -98,7 +98,7 @@ impl GlData {
     pub fn get_glyph(&self, char: char) -> Option<Glyph> {
         for glyph in &self.glyphs {
             if glyph.symbol == char {
-                return Some(*glyph)
+                return Some(*glyph);
             }
         }
         //panic!("There is on glyph for: {}", char)

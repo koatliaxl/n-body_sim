@@ -25,8 +25,8 @@ pub fn view_pos_changed(gl_res: &GlData, state: &mut State, window_size: (i32, i
 
         let text_shader = gl_res.get_shader_gl_id("Text shader");
         gl::UseProgram(text_shader);
-        let proj_mat = Matrix4x4::<f32>::new_perspective_projection_by_dimensions(
-            w as f32, 0.0, h as f32, 0.0, 1.0, 0.1,
+        let proj_mat = Matrix4x4::<f32>::new_orthographic_projection(
+            3.0 as f32, 2.0 as f32, 1.0, -0.1, /* fmt force new line */
         );
         gl_res.set_uniform_mat4x4("proj_mat", "Text shader", &proj_mat);
     }

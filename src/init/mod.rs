@@ -116,15 +116,15 @@ pub fn init_shaders(gl_data: &mut GlData) {
             "Text fragment shader",
         );
         let text_shader = gen_shader_program(text_vertex, text_frag, "Text shader");
-        let proj_mat = gl::GetUniformLocation(obj_shader, "proj_mat\0".as_ptr() as *const i8);
-        let glyph = gl::GetUniformLocation(obj_shader, "glyph\0".as_ptr() as *const i8);
-        let text_color = gl::GetUniformLocation(obj_shader, "text_color\0".as_ptr() as *const i8);
-        let text_color = gl::GetUniformLocation(obj_shader, "pos_mat\0".as_ptr() as *const i8);
+        let proj_mat = gl::GetUniformLocation(text_shader, "proj_mat\0".as_ptr() as *const i8);
+        let glyph = gl::GetUniformLocation(text_shader, "glyph\0".as_ptr() as *const i8);
+        let text_color = gl::GetUniformLocation(text_shader, "text_color\0".as_ptr() as *const i8);
+        let pos_mat = gl::GetUniformLocation(text_shader, "pos_mat\0".as_ptr() as *const i8);
         gl_data.add_shader_gl_id("Text shader", text_shader);
         gl_data.add_variable_location("Text shader", "proj_mat", proj_mat);
         gl_data.add_variable_location("Text shader", "glyph", glyph);
         gl_data.add_variable_location("Text shader", "text_color", text_color);
-        gl_data.add_variable_location("Text shader", "pos_mat", text_color);
+        gl_data.add_variable_location("Text shader", "pos_mat", pos_mat);
 
         gl::DeleteShader(obj_vertex);
         //gl::DeleteShader(obj_geom);

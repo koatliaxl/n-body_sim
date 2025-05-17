@@ -52,6 +52,8 @@ pub fn init_glyphs(gl_data: &mut GlData) {
     }
     unsafe {
         gl::PixelStorei(gl::UNPACK_ALIGNMENT, 1);
+        gl::Enable(gl::BLEND);
+        gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
         /*use freetype::freetype_sys::FT_Done_Face;
         use freetype::freetype_sys::FT_Done_Library;
         FT_Done_Face(face);

@@ -50,7 +50,13 @@ pub unsafe fn init_obj(gl_data: &mut GlData) {
 }
 
 pub unsafe fn init_quad(gl_data: &mut GlData) {
-    let quad_vertices = [-1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0];
+    let quad_vertices = [
+        -1.0_f32, -1.0,
+        -1.0, 1.0,
+        1.0, 1.0,
+        1.0, -1.0,
+        -1.0, -1.0
+    ];
 
     let mut vertex_buf = 0;
     gl::GenBuffers(1, &mut vertex_buf);
@@ -72,7 +78,7 @@ pub unsafe fn init_quad(gl_data: &mut GlData) {
         position_attrib_len,
         gl::FLOAT,
         gl::FALSE,
-        SIZE_OF_GL_FLOAT as i32 * (position_attrib_len + tex_coord_attrib_len),
+        SIZE_OF_GL_FLOAT as i32 * (position_attrib_len/*+ tex_coord_attrib_len*/),
         0 as *const c_void,
     );
     gl::EnableVertexAttribArray(0);
@@ -81,11 +87,11 @@ pub unsafe fn init_quad(gl_data: &mut GlData) {
         tex_coord_attrib_len,
         gl::FLOAT,
         gl::FALSE,
-        SIZE_OF_GL_FLOAT as i32 * (position_attrib_len + tex_coord_attrib_len),
-        (SIZE_OF_GL_FLOAT * position_attrib_len as isize) as *const c_void,
+        SIZE_OF_GL_FLOAT as i32 * (position_attrib_len/*+ tex_coord_attrib_len*/),
+        0 as *const c_void, //(SIZE_OF_GL_FLOAT * position_attrib_len as isize) as *const c_void,
     );
     gl::EnableVertexAttribArray(1);
 
     gl_data.add_vertex_buffer_gl_id("Quad", vertex_buf);
-    gl_data.add_vertex_array_gl_id("Position and texture", vertex_array);
+    gl_data.add_vertex_array_gl_id("Position and Texture", vertex_array);
 }
