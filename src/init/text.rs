@@ -51,7 +51,6 @@ pub fn init_glyphs(gl_data: &mut GlData) {
         gl_data.add_glyph(glyph)
     }
     unsafe {
-        gl::PixelStorei(gl::UNPACK_ALIGNMENT, 1);
         gl::Enable(gl::BLEND);
         gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
         /*use freetype::freetype_sys::FT_Done_Face;
