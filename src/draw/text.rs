@@ -16,7 +16,7 @@ pub unsafe fn draw_text(gl_res: &GlData, _world: &World, _state: &State, window_
     //let text_color = Vector3::new(0.7, 0.3, 0.1);
     gl_res.set_uniform_vec3f("text_color", "Text shader", Vector3::new(0.7, 0.3, 0.1));
 
-    let text = "AAbc A123 Def";
+    let text = "A";
     let mut pos_x = 10; // in pixels
     let pos_y = 50;
     for ch in text.chars() {
@@ -30,7 +30,7 @@ pub unsafe fn draw_text(gl_res: &GlData, _world: &World, _state: &State, window_
             let pos_mat = translation * scaling;
             //println!("{}, {}; {}, {}", rel_w, rel_h, rel_pos_x, rel_pos_y);
             gl_res.set_uniform_mat4x4("pos_mat", "Text shader", &pos_mat);
-            pos_x += (glyph.advance as f32 / 26.6) as i32;
+            pos_x += (glyph.advance as f32/*/ 26.6*/) as i32;
             //println!("{}", pos_x);
             gl::BindTexture(gl::TEXTURE_2D, glyph.texture_id);
             gl::DrawArrays(gl::TRIANGLES, 0, 6);

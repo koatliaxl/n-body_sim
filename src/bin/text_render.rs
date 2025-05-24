@@ -1,10 +1,10 @@
-use freetype as ft;
-use std::io::stdin;
+//use freetype as ft;
+//use std::io::stdin;
 
-static ASKII_ASPECT_RATIO: usize = 2; // to compensate width to height ratio of console characters
+//static ASKII_ASPECT_RATIO: usize = 2; // to compensate width to height ratio of console characters
 
 fn main() {
-    let library = ft::Library::init().unwrap();
+    /*let library = ft::Library::init().unwrap();
     let face = library.new_face("assets/Lexend-Regular.ttf", 0).unwrap();
 
     println!("Enter symbol to draw and/or resolution multiplier:");
@@ -55,5 +55,5 @@ fn main() {
             print!("{}", c)
         }
         println!()
-    }
+    }*/
 }
