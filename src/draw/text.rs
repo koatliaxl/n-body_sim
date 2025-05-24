@@ -16,7 +16,7 @@ pub unsafe fn draw_text(gl_res: &GlData, _world: &World, _state: &State, window_
     //let text_color = Vector3::new(0.7, 0.3, 0.1);
     gl_res.set_uniform_vec3f("text_color", "Text shader", Vector3::new(0.7, 0.3, 0.1));
 
-    let text = "A";
+    let text = "aabbcc 123abc";
     let mut pos_x = 10; // in pixels
     let pos_y = 50;
     for ch in text.chars() {

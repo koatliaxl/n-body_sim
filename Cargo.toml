@@ -13,8 +13,9 @@ gl_generator = "0.14.0"
 [dependencies]
 #freetype-rs = {version = "0.38.0", features = ["bundled"]}
 #freetype-rs = "0.36.0"
-rusttype = "0.9.3"
-ttf-parser = "0.25.1"
+#rusttype = "0.9.3"
+#ttf-parser = "0.25.1"
+fontdue = "0.9.3"
 
 [dependencies.glfw]
 #git = "https://github.com/bjz/glfw-rs.git"

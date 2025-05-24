@@ -17,7 +17,7 @@ pub struct Glyph {
     pub texture_id: u32,
     pub size: Vector3<i32>,
     pub bearing: Vector3<i32>,
-    pub advance: i32,
+    pub advance: f32,
 }
 
 impl GlData {

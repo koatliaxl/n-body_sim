@@ -1,18 +1,23 @@
 //use freetype as ft;
-//use std::io::stdin;
+use std::io::stdin;
 
-//static ASKII_ASPECT_RATIO: usize = 2; // to compensate width to height ratio of console characters
+static ASKII_ASPECT_RATIO: usize = 2; // to compensate width to height ratio of console characters
 
 fn main() {
     /*let library = ft::Library::init().unwrap();
-    let face = library.new_face("assets/Lexend-Regular.ttf", 0).unwrap();
+    let face = library.new_face("assets/Lexend-Regular.ttf", 0).unwrap();*/
+    let font_data = include_bytes!("../../assets/Lexend-Regular.ttf") as &[u8];
+    let font = fontdue::Font::from_bytes(font_data, fontdue::FontSettings::default())
+        .expect("Failed to construct a font");
+
+    let mut size = 1;
+    let mut char = ' ';
 
     println!("Enter symbol to draw and/or resolution multiplier:");
     let mut input = String::new();
     stdin()
         .read_line(&mut input)
         .expect("Error while trying read input");
-    let mut size = 1;
     let mut chars = input.chars();
     if let Some(ch) = chars.next() {
         match ch {
@@ -33,27 +38,30 @@ fn main() {
                     Some('\r') | Some('\n') => (),
                     _ => println!("Please, enter just a single character"),
                 }
-                face.set_char_size(40 * 64, 0, 50 * size, 0).unwrap();
+                /*face.set_char_size(40 * 64, 0, 50 * size, 0).unwrap();
                 face.load_char(ch as usize, ft::face::LoadFlag::RENDER)
-                    .unwrap();
+                    .unwrap();*/
+                char = ch;
             }
             '\n' | '\r' => (),
             _ => println!("Please, enter a printable character"),
         }
     }
-    let glyph = face.glyph();
+    let (mtr, bitmap) = font.rasterize(char, 10.0 * size as f32);
+
+    //let glyph = face.glyph();
     let mapping = b" .:-;+*x#@";
     let mapping_scale = (mapping.len() - 1) as f32;
-    let w = glyph.bitmap().width() as usize * ASKII_ASPECT_RATIO;
+    let w = mtr.width * ASKII_ASPECT_RATIO;
 
-    for i in 0..glyph.bitmap().rows() as usize {
+    for i in 0..mtr.height {
         for j in 0..w {
-            let v = glyph.bitmap().buffer()[(i * w + j) / ASKII_ASPECT_RATIO];
+            let v = bitmap[(i * w + j) / ASKII_ASPECT_RATIO];
             let i = ((v as f32 / 256.0) * mapping_scale + 0.5) as usize;
             // '$' in the output if something wrong
             let c = mapping.get(i).cloned().unwrap_or(b'$') as char;
             print!("{}", c)
         }
         println!()
-    }*/
+    }
 }
