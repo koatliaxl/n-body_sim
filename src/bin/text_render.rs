@@ -1,14 +1,13 @@
-//use freetype as ft;
+use fontdue::{Font, FontSettings};
 use std::io::stdin;
 
 static ASKII_ASPECT_RATIO: usize = 2; // to compensate width to height ratio of console characters
+static ASKII_BASE_SIZE: f32 = 10.0;
 
 fn main() {
-    /*let library = ft::Library::init().unwrap();
-    let face = library.new_face("assets/Lexend-Regular.ttf", 0).unwrap();*/
     let font_data = include_bytes!("../../assets/Lexend-Regular.ttf") as &[u8];
-    let font = fontdue::Font::from_bytes(font_data, fontdue::FontSettings::default())
-        .expect("Failed to construct a font");
+    let font =
+        Font::from_bytes(font_data, FontSettings::default()).expect("Failed to construct a font");
 
     let mut size = 1;
     let mut char = ' ';
@@ -38,18 +37,13 @@ fn main() {
                     Some('\r') | Some('\n') => (),
                     _ => println!("Please, enter just a single character"),
                 }
-                /*face.set_char_size(40 * 64, 0, 50 * size, 0).unwrap();
-                face.load_char(ch as usize, ft::face::LoadFlag::RENDER)
-                    .unwrap();*/
                 char = ch;
             }
             '\n' | '\r' => (),
             _ => println!("Please, enter a printable character"),
         }
     }
-    let (mtr, bitmap) = font.rasterize(char, 10.0 * size as f32);
-
-    //let glyph = face.glyph();
+    let (mtr, bitmap) = font.rasterize(char, ASKII_BASE_SIZE * size as f32);
     let mapping = b" .:-;+*x#@";
     let mapping_scale = (mapping.len() - 1) as f32;
     let w = mtr.width * ASKII_ASPECT_RATIO;
