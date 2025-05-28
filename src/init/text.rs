@@ -7,8 +7,9 @@ pub fn init_glyphs(gl_data: &mut GlData) {
     let font = fontdue::Font::from_bytes(font_data, fontdue::FontSettings::default())
         .expect("Failed to construct a font");
 
+    unsafe { gl::PixelStorei(gl::UNPACK_ALIGNMENT, 1); }
     for ch in '!'..'~' {
-        let (mtr, bitmap) = font.rasterize(ch, 60.0);
+        let (mtr, bitmap) = font.rasterize(ch, 30.0);
 
         let mut texture_id = 0;
         unsafe {
@@ -31,8 +32,8 @@ pub fn init_glyphs(gl_data: &mut GlData) {
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
         }
         let size = Vector3::new(mtr.width as i32, mtr.height as i32, 0);
-        let bearing = Vector3::new(mtr.width as i32 + 20, mtr.height as i32 + 20, 0);
-
+        let bearing = Vector3::new(mtr.xmin, mtr.ymin, 0);
+        println!("{}, {}; {}", mtr.xmin, mtr.ymin, mtr.advance_width);
         let glyph = Glyph {
             symbol: ch,
             texture_id,

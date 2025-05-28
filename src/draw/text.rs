@@ -12,20 +12,20 @@ pub unsafe fn draw_text(gl_res: &GlData, _world: &World, _state: &State, window_
     let (w, h) = (window_size.0 as f32, window_size.1 as f32);
     gl_res.set_uniform_vec3f("text_color", "Text shader", Vector3::new(0.7, 0.3, 0.1));
 
-    let text = "aabbcc 123abc";
-    let mut pos_x = 10; // in pixels
-    let pos_y = 50;
+    let text = "abc 123 DEF";
+    let mut pos_x = 100; // in pixels
+    let pos_y = 250;
     for ch in text.chars() {
         if let Some(glyph) = gl_res.get_glyph(ch) {
-            let rel_w = glyph.size.x() as f32 / w;
-            let rel_h = glyph.size.y() as f32 / h;
+            let rel_w = glyph.size.x() as f32/* * 2.0 / w*/;
+            let rel_h = glyph.size.y() as f32/* * 2.0 / h*/;
             let scaling = Matrix4x4::new_scaling(rel_w, rel_h, 1.0);
-            let rel_pos_x = (pos_x + glyph.bearing.x()) as f32 / w;
-            let rel_pos_y = (pos_y + glyph.bearing.y()) as f32 / h;
+            let rel_pos_x = (pos_x + glyph.bearing.x()) as f32/* * 2.0 / w*/ - w / 2.0;
+            let rel_pos_y = (pos_y + glyph.bearing.y()) as f32/* * 2.0 / h*/ - h / 2.0;
             let translation = Matrix4x4::new_translation(rel_pos_x, rel_pos_y, 0.0);
-            let pos_mat = translation * scaling;
+            let pos_mat =  translation * scaling;
             gl_res.set_uniform_mat4x4("pos_mat", "Text shader", &pos_mat);
-            pos_x += (glyph.advance) as i32;
+            pos_x += (glyph.advance * 2.0) as i32;
             //println!("{}", pos_x);
             gl::BindTexture(gl::TEXTURE_2D, glyph.texture_id);
             gl::DrawArrays(gl::TRIANGLES, 0, 6);
