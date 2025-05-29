@@ -7,7 +7,9 @@ pub fn init_glyphs(gl_data: &mut GlData) {
     let font = fontdue::Font::from_bytes(font_data, fontdue::FontSettings::default())
         .expect("Failed to construct a font");
 
-    unsafe { gl::PixelStorei(gl::UNPACK_ALIGNMENT, 1); }
+    unsafe {
+        gl::PixelStorei(gl::UNPACK_ALIGNMENT, 1);
+    }
     for ch in '!'..'~' {
         let (mtr, bitmap) = font.rasterize(ch, 30.0);
 

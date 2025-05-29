@@ -50,7 +50,7 @@ pub unsafe fn init_obj(gl_data: &mut GlData) {
 }
 
 pub unsafe fn init_quad(gl_data: &mut GlData) {
-    let quad_vertices = [
+    /*let quad_vertices = [
         [-1.0, 1.0, 0.0, 0.0],
         [-1.0, -1.0, 0.0, 1.0],
         [1.0, -1.0, 1.0, 1.0],
@@ -63,16 +63,22 @@ pub unsafe fn init_quad(gl_data: &mut GlData) {
         for j in 0..4 {
             vertices_raw[vrt * 4 + j] = quad_vertices[vrt][j]
         }
-    }
+    }*/
 
     let mut vertex_buf = 0;
     gl::GenBuffers(1, &mut vertex_buf);
     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);
-    gl::BufferData(
+    /*gl::BufferData(
         gl::ARRAY_BUFFER,
         vertices_raw.len() as isize * SIZE_OF_GL_FLOAT,
         vertices_raw.as_ptr() as *const c_void,
         gl::STATIC_DRAW,
+    );*/
+    gl::BufferData(
+        gl::ARRAY_BUFFER,
+        6 * 4 * SIZE_OF_GL_FLOAT,
+        0 as *const c_void,
+        gl::DYNAMIC_DRAW,
     );
 
     let mut vertex_array = 0;
