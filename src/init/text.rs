@@ -11,6 +11,7 @@ pub fn init_glyphs(gl_data: &mut GlData) {
         .expect("Failed to load font");
     face.set_pixel_sizes(0, 48)
         .expect("Failed to set font size");
+    unsafe { gl::PixelStorei(gl::UNPACK_ALIGNMENT, 1) };
     for ch in '!'..'~' {
         if let Err(err) = face.load_char(ch as usize, LoadFlag::RENDER) {
             eprintln!("Failed to load glyph ({})", err)

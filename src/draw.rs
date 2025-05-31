@@ -18,8 +18,6 @@ pub fn draw(gl_res: &GlData, world: &World, state: &State, window_size: (i32, i3
         //gl::LineWidth(2.0);
 
         draw_bodies(gl_res, world, state);
-
-        gl::PixelStorei(gl::UNPACK_ALIGNMENT, 1);
         draw_text(gl_res, world, state, window_size);
     }
 }

@@ -16,9 +16,9 @@ pub unsafe fn draw_text(gl_res: &GlData, _world: &World, _state: &State, window_
     //let text_color = Vector3::new(0.7, 0.3, 0.1);
     gl_res.set_uniform_vec3f("text_color", "Text shader", Vector3::new(0.7, 0.3, 0.1));
 
-    let text = "AAbc A123 Def";
-    let mut pos_x = 10; // in pixels
-    let pos_y = 50;
+    let text = "Abc 123 Def";
+    let mut pos_x = -50; // in pixels
+    let pos_y = 150;
     for ch in text.chars() {
         if let Some(glyph) = gl_res.get_glyph(ch) {
             let rel_w = glyph.size.x() as f32 / w;
