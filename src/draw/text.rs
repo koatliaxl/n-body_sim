@@ -1,5 +1,5 @@
 use crate::{GlData, State, World};
-use mat_vec::{Matrix4x4, Vector3};
+use mat_vec::Vector3;
 use n_body_sim::gl::types::GLvoid;
 use n_body_sim::{gl, SIZE_OF_GL_FLOAT};
 
@@ -16,12 +16,12 @@ pub unsafe fn draw_text(gl_res: &GlData, _world: &World, _state: &State, window_
     let text = "abc 123 DEF";
     let scale = 1.0;
 
-    let mut text_x = 10; // in pixels
-    let text_y = 20;
+    let mut text_x = -100; // in pixels
+    let text_y = 100;
     for ch in text.chars() {
         if let Some(glyph) = gl_res.get_glyph(ch) {
             let ch_x = (text_x + glyph.bearing.x()) as f32 * scale;
-            let ch_y = (text_y - glyph.size.y() + glyph.bearing.y()) as f32 * scale;
+            let ch_y = text_y as f32 + glyph.bearing.y() as f32 * scale;
             let ch_w = glyph.size.x() as f32 * scale;
             let ch_h = glyph.size.y() as f32 * scale;
             let vertices = [
@@ -48,15 +48,6 @@ pub unsafe fn draw_text(gl_res: &GlData, _world: &World, _state: &State, window_
                 vertices_raw.as_ptr() as *const GLvoid,
             );
             gl::BindBuffer(gl::ARRAY_BUFFER, 0);
-            /*let rel_w = glyph.size.x() as f32/* * 2.0 / w*/;
-            let rel_h = glyph.size.y() as f32/* * 2.0 / h*/;
-            let scaling = Matrix4x4::new_scaling(rel_w, rel_h, 1.0);
-            let rel_pos_x = (text_x + glyph.bearing.x()) as f32/* * 2.0 / w*/ - w / 2.0;
-            let rel_pos_y = (text_y + glyph.bearing.y()) as f32/* * 2.0 / h*/ - h / 2.0;
-            let translation = Matrix4x4::new_translation(rel_pos_x, rel_pos_y, 0.0);
-            let pos_mat =  translation * scaling;
-            gl_res.set_uniform_mat4x4("pos_mat", "Text shader", &pos_mat);*/
-            //text_x += (glyph.advance * 2.0) as i32;
             text_x += (glyph.advance * scale) as i32;
 
             gl::DrawArrays(gl::TRIANGLES, 0, 6);
