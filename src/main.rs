@@ -31,9 +31,8 @@ fn main() {
     init_shaders(&mut gl_data);
     let num_of_threads = 3;
     let mut world = init_world(num_of_threads);
-    unsafe {
-        init_draw(&mut gl_data);
-    }
+    init_draw(&mut gl_data);
+    init_glyphs(&mut gl_data);
     let mut state = State::new(&world.obj_mirror);
 
     view_pos_changed(&gl_data, &mut state, window.get_size());
@@ -50,9 +49,7 @@ fn main() {
         }
         let since_last_frame = last_frame_time.elapsed();
         if since_last_frame.as_secs_f64() * 1000.0 >= between_frames || state.run_state != Stop {
-            unsafe {
-                draw(&gl_data, &world, &state);
-            }
+            draw(&gl_data, &world, &state, window.get_size());
             window.swap_buffers();
             last_frame_time = Instant::now();
         }

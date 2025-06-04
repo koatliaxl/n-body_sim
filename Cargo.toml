@@ -1,8 +1,9 @@
 [package]
 name = "n-body_sim"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2018"
 build = "gl/build.rs"
+default-run = "n-body_sim"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,8 +11,7 @@ build = "gl/build.rs"
 gl_generator = "0.14.0"
 
 [dependencies]
-#glutin = "0.24.1"
-#winit = "0.19.2"
+fontdue = "0.9.3"
 
 [dependencies.glfw]
 #git = "https://github.com/bjz/glfw-rs.git"

@@ -7,6 +7,17 @@ pub struct GlData {
     vex_bufs: HashMap<String, u32>,
     vex_arr: HashMap<String, u32>,
     var_locations: HashMap<String, HashMap<String, i32>>,
+
+    glyphs: Vec<Glyph>,
+}
+
+#[derive(Copy, Clone)]
+pub struct Glyph {
+    pub symbol: char,
+    pub texture_id: u32,
+    pub size: Vector3<i32>,
+    pub bearing: Vector3<i32>,
+    pub advance: f32,
 }
 
 impl GlData {
@@ -16,6 +27,8 @@ impl GlData {
             vex_bufs: HashMap::new(),
             vex_arr: HashMap::new(),
             var_locations: HashMap::new(),
+
+            glyphs: Vec::new(),
         }
     }
     pub fn get_shader_gl_id(&self, name: &str) -> u32 {
@@ -76,6 +89,20 @@ impl GlData {
         } else {
             panic!("The is no shader of the name3: {}", shader_name)
         }
+    }
+
+    pub fn add_glyph(&mut self, glyph: Glyph) {
+        self.glyphs.push(glyph)
+    }
+
+    pub fn get_glyph(&self, char: char) -> Option<Glyph> {
+        for glyph in &self.glyphs {
+            if glyph.symbol == char {
+                return Some(*glyph);
+            }
+        }
+        //panic!("There is on glyph for: {}", char)
+        None
     }
 
     #[allow(dead_code)]
