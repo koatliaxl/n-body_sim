@@ -53,7 +53,10 @@ pub struct SuspectedCollision {
 pub enum SuspectCollChange {
     Increase,
     Decrease,
-    Stagnant,
+    SlightIncrease,
+    SlightDecrease,
+    MoreDecrease,
+    //Stagnant,
 }
 
 impl Body {
@@ -65,7 +68,7 @@ impl Body {
             class: BodyType::Massive,
             id: unsafe { ID_TABLE.take_new_id() },
             suspect_for_collision: HashMap::new(),
-            phys_radius: Self::calculate_radius(mass)
+            phys_radius: Self::calculate_radius(mass),
         }
     }
 
@@ -78,11 +81,11 @@ impl Body {
             class,
             id,
             suspect_for_collision: HashMap::new(),
-            phys_radius: Self::calculate_radius(mass)
+            phys_radius: Self::calculate_radius(mass),
         }
     }
 
-    pub fn calculate_radius(mass: f64) -> f64{
+    pub fn calculate_radius(mass: f64) -> f64 {
         use std::f64::consts::PI;
         (mass * BODY_DENSITY_VALUE / PI).sqrt()
     }
@@ -135,7 +138,10 @@ impl SuspectCollChange {
         match self {
             Increase => 1.0,
             Decrease => -1.0,
-            Stagnant => 0.0,
+            //Stagnant => 0.0,
+            SlightDecrease => -0.5,
+            SlightIncrease => 0.5,
+            MoreDecrease => -2.0,
         }
     }
 }
@@ -153,7 +159,7 @@ impl Clone for Body {
                 .iter()
                 .map(|(id, coll)| (*id, coll.clone()))
                 .collect::<HashMap<u64, SuspectedCollision>>(),
-            phys_radius: self.phys_radius
+            phys_radius: self.phys_radius,
         }
     }
 }
