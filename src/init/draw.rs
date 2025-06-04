@@ -7,7 +7,7 @@ use std::ffi::c_void;
 pub fn init_draw(gl_data: &mut GlData) {
     unsafe {
         init_obj(gl_data);
-        init_quad(gl_data)
+        init_pos_tex_dyn_draw(gl_data)
     }
 }
 
@@ -49,31 +49,10 @@ pub unsafe fn init_obj(gl_data: &mut GlData) {
     gl_data.add_vertex_buffer_gl_id("Circle", vertex_buf)
 }
 
-pub unsafe fn init_quad(gl_data: &mut GlData) {
-    /*let quad_vertices = [
-        [-1.0, 1.0, 0.0, 0.0],
-        [-1.0, -1.0, 0.0, 1.0],
-        [1.0, -1.0, 1.0, 1.0],
-        [-1.0, 1.0, 0.0, 0.0],
-        [1.0, -1.0, 1.0, 1.0],
-        [1.0, 1.0, 1.0, 0.0],
-    ];
-    let mut vertices_raw = [0.0_f32; 4 * 6];
-    for vrt in 0..6 {
-        for j in 0..4 {
-            vertices_raw[vrt * 4 + j] = quad_vertices[vrt][j]
-        }
-    }*/
-
+pub unsafe fn init_pos_tex_dyn_draw(gl_data: &mut GlData) {
     let mut vertex_buf = 0;
     gl::GenBuffers(1, &mut vertex_buf);
     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);
-    /*gl::BufferData(
-        gl::ARRAY_BUFFER,
-        vertices_raw.len() as isize * SIZE_OF_GL_FLOAT,
-        vertices_raw.as_ptr() as *const c_void,
-        gl::STATIC_DRAW,
-    );*/
     gl::BufferData(
         gl::ARRAY_BUFFER,
         6 * 4 * SIZE_OF_GL_FLOAT,

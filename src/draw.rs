@@ -1,7 +1,6 @@
 use crate::{GlData, State, World};
 use mat_vec::{Matrix4x4, Vector3};
 use n_body_sim::gl;
-//use std::f32::consts::PI;
 
 pub use text::*;
 
@@ -9,7 +8,7 @@ pub mod text;
 
 pub static BODY_GFX_SCALE: f32 = 0.4;
 
-pub fn draw(gl_res: &GlData, world: &World, state: &State, window_size: (i32, i32)) {
+pub fn draw(gl_res: &GlData, world: &World, state: &State, _window_size: (i32, i32)) {
     unsafe {
         gl::ClearColor(0.2, 0.1, 0.5, 1.0);
         gl::Clear(gl::COLOR_BUFFER_BIT);
@@ -18,7 +17,13 @@ pub fn draw(gl_res: &GlData, world: &World, state: &State, window_size: (i32, i3
         //gl::LineWidth(2.0);
 
         draw_bodies(gl_res, world, state);
-        draw_text(gl_res, world, state, window_size);
+        draw_text(
+            gl_res, /*, world, state, window_size*/
+            "abc 123 DEF",
+            (-150, 110),
+            1.0,
+        );
+        draw_text(gl_res, "OpenGL", (-50, -130), 1.5);
     }
 }
 
