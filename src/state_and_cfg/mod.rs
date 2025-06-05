@@ -8,9 +8,9 @@ use std::thread;
 use std::thread::JoinHandle;
 use std::time::Instant;
 
-pub use gl_data::*;
+/*pub use gl_data::*;
 
-pub mod gl_data;
+pub mod gl_data;*/
 
 #[derive(PartialEq)]
 pub enum RunState {

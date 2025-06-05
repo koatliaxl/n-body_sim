@@ -6,7 +6,7 @@ use glfw::MouseButton::Button1 as LeftButton;
 use glfw::WindowEvent::{CursorPos, MouseButton /* as MousePress*/, Scroll, Size};
 use glfw::{Key, Window, WindowEvent};
 //use mat_vec::Vector3;
-use n_body_sim::gl;
+use n_body_sim::{gl, GlData};
 use std::sync::mpsc::Receiver;
 
 pub use create::*;

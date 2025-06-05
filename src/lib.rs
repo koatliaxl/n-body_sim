@@ -2,6 +2,8 @@ use self::SuspectCollChange::*;
 use mat_vec::Vector3;
 use std::collections::HashMap;
 
+pub use gl_data::GlData;
+pub use gl_data::Glyph;
 pub use support::id_table::ObjectIdTable;
 
 pub const SIZE_OF_GL_FLOAT: isize = std::mem::size_of::<gl::types::GLfloat>() as isize;
@@ -14,6 +16,8 @@ pub mod gl {
     include!("../gl/bindings.rs");
 }
 
+pub mod gl_data;
+pub mod gui;
 #[cfg(test)]
 mod tests;
 pub mod support {
