@@ -44,7 +44,7 @@ impl GIE for Label {
         )
     }
 
-    fn get_base(&self) -> &GieBase {
-        &self.base
+    fn get_base(&mut self) -> &mut GieBase {
+        &mut self.base
     }
 }
