@@ -1,3 +1,4 @@
+use core::option::Option;
 //use core::option::Option;
 use crate::gui::MetaType::{Compound, Single};
 use crate::GlData;
@@ -57,5 +58,20 @@ pub trait GIE {
     fn change_pos(&mut self, pos: (i32, i32)) {
         *self.get_base().pos.x_mut() = pos.0;
         *self.get_base().pos.y_mut() = pos.1
+    }
+
+    fn get_gie<Gie>(&mut self, name: &str) -> Option<&mut Gie>
+    where
+        Gie: GIE,
+    {
+        if self.get_base().name.as_str() == name {
+            return Some(&mut self);
+        }
+        if let Compound { contain } = self.get_base().meta_type {
+            for gie in contain {
+                return gie.get_gie(name);
+            }
+        }
+        None
     }
 }

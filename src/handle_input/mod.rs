@@ -10,6 +10,7 @@ use n_body_sim::{gl, GlData};
 use std::sync::mpsc::Receiver;
 
 pub use create::*;
+use n_body_sim::gui::RootGIE;
 pub use select::*;
 pub use view::*;
 
@@ -23,6 +24,7 @@ pub fn handle_events(
     state: &mut State,
     gl_data: &GlData,
     world: &World,
+    gui: &mut RootGIE,
 ) {
     if window.get_key(Key::Escape) == Press {
         window.set_should_close(true);
@@ -38,7 +40,7 @@ pub fn handle_events(
                 if button == LeftButton && action == Press {
                     state.left_mouse_bt_was_pressed = true;
                     state.cursor_pos_when_press = state.last_cursor_pos;
-                    select_obj(state, &world, window.get_size());
+                    select_obj(state, &world, window.get_size(), gui);
                 }
                 if button == LeftButton && action == Release {
                     state.left_mouse_bt_was_pressed = false;

@@ -9,8 +9,6 @@ pub struct Label {
 }
 
 impl Label {
-    //mut static DEFAULT_DRAW_FUNCTION: Option<fn()> = None;
-
     pub fn new(
         pos: (i32, i32),
         name: String,

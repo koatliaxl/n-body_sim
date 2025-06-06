@@ -1,6 +1,6 @@
-//use crate::gui::MetaType::*;
 use crate::gui::GIE;
 use crate::GlData;
+use core::option::Option;
 
 pub struct RootGIE {
     contain: Vec<Box<dyn GIE>>,
@@ -23,12 +23,19 @@ impl RootGIE {
     pub fn draw(&self, gl_data: &GlData) {
         for gie in &self.contain {
             gie.draw(gl_data, gie.get_base())
-            /*if let Compound(contain) = gie.get_base() {
-                for child in &contain {
-                    child.draw()
-                }
-            }*/
         }
+    }
+
+    pub fn get_gie<Gie>(&mut self, name: &str) -> Option<&mut Gie>
+    where
+        Gie: GIE,
+    {
+        for gie in &self.contain {
+            if let some = gie.get_gie(name) {
+                return some;
+            }
+        }
+        None
     }
 }
 

@@ -1,8 +1,9 @@
 use crate::draw::BODY_GFX_SCALE;
 use crate::{State, World};
 use mat_vec::{Matrix4x4, Vector3, Vector4};
+use n_body_sim::gui::{Label, RootGIE, GIE};
 
-pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32)) {
+pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32), gui: &mut RootGIE) {
     state.selected = -1;
     let (x, y) = (
         state.last_cursor_pos.0 as f32,
@@ -38,7 +39,11 @@ pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32)) {
         let radius = BODY_GFX_SCALE * o.get_radius() as f32;
         if equation_val < (radius / state.view_scale * (w + h) / 2.0).powi(2) {
             state.selected = o.get_id() as i64;
-            println!("mass: {}", o.mass)
+            println!("mass: {}", o.mass);
+            let world_pos = o.pos;
+            let pos_label: &mut Label = gui.get_gie("body_pos_text").unwrap();
+            pos_label.change_text(format!("{}, {}", world_pos.x(), world_pos.y()));
+            pos_label.change_pos((pos_on_scr.x(), pos_on_scr.y()))
         }
     }
 }
