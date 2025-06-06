@@ -35,6 +35,7 @@ fn main() {
     init_draw(&mut gl_data);
     init_glyphs(&mut gl_data);
     let mut state = State::new(&world.obj_mirror);
+    let gui = init_gui();
 
     view_pos_changed(&gl_data, &mut state, window.get_size());
     view_scale_changed(&gl_data, &state, window.get_size());

@@ -1,9 +1,11 @@
 pub mod draw;
+pub mod gui;
 pub mod shader;
 pub mod text;
 pub mod world;
 
 pub use draw::init_draw;
+pub use gui::*;
 pub use text::*;
 
 use super::gl;

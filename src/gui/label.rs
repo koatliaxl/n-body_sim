@@ -1,0 +1,52 @@
+use super::{GieBase, GIE};
+use crate::GlData;
+
+pub struct Label {
+    base: GieBase,
+    text: String,
+    text_size: f32,
+    draw_function: fn(gl_res: &GlData, text: &str, pos: (i32, i32), scale: f32),
+}
+
+impl Label {
+    //mut static DEFAULT_DRAW_FUNCTION: Option<fn()> = None;
+
+    pub fn new(
+        pos: (i32, i32),
+        name: String,
+        text: &str,
+        text_size: f32,
+        draw_function: fn(gl_res: &GlData, text: &str, pos: (i32, i32), scale: f32),
+    ) -> Label {
+        let base = GieBase::new(pos, name, false);
+        Label {
+            base,
+            text: text.to_string(),
+            text_size,
+            draw_function,
+        }
+    }
+
+    pub fn change_text(&mut self, text: String) {
+        self.text = text
+    }
+
+    pub fn get_text(&self) -> &str {
+        &self.text
+    }
+}
+
+impl GIE for Label {
+    fn draw(&self, gl_data: &GlData, base: &GieBase) {
+        (self.draw_function)(
+            gl_data,
+            &self.text,
+            (base.pos.x(), base.pos.y()),
+            self.text_size,
+        )
+    }
+
+    fn get_base(&self) -> &GieBase {
+        &self.base
+    }
+}
