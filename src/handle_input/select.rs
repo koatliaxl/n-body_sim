@@ -41,9 +41,13 @@ pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32), gui
             state.selected = o.get_id() as i64;
             println!("mass: {}", o.mass);
             let world_pos = o.pos;
-            let pos_label: &mut Label = gui.get_gie("body_pos_text").unwrap();
-            pos_label.change_text(format!("{}, {}", world_pos.x(), world_pos.y()));
-            pos_label.change_pos((pos_on_scr.x(), pos_on_scr.y()))
+            let mut pos_label/*: &mut Label*/ = gui.get_gie("body_pos_text").unwrap();
+            pos_label.change_pos((pos_on_scr.x() as i32, pos_on_scr.y() as i32));
+            pos_label
+                .get_type()
+                .downcast_mut::<Label>()
+                .expect("failed to downcast GIE as Label")
+                .change_text(format!("{}, {}", world_pos.x(), world_pos.y()));
         }
     }
 }

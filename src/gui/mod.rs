@@ -1,5 +1,5 @@
-use core::marker::Sized;
 use core::option::Option;
+use std::any::Any;
 //use core::option::Option;
 use crate::gui::MetaType::{Compound, Single};
 use crate::GlData;
@@ -40,9 +40,25 @@ impl GieBase {
         }
     }
 
-    /*fn change_pos(pos: (i32, i32)) {
+    /*pub fn change_pos(&mut self, pos: (i32, i32)) {
 
     }*/
+
+    fn get_gie<'a>(
+        &'a mut self,
+        name: &str, /*, gie_type: &'a mut dyn GIE*/
+    ) -> Option<&'a mut dyn GIE> {
+        /*if self.name.as_str() == name {
+            return Some(gie_type);
+        }*/
+        if let Compound { ref mut contain } = self.meta_type {
+            for gie in contain {
+                //return gie.get_base_mut().get_gie(name, self);
+                return gie.get_gie(name);
+            }
+        }
+        None
+    }
 }
 
 pub trait GIE {
@@ -54,25 +70,32 @@ pub trait GIE {
         }
     }
 
-    fn get_base(&mut self) -> &mut GieBase;
+    fn get_base(&self) -> &GieBase;
+
+    fn get_base_mut(&mut self) -> &mut GieBase;
 
     fn change_pos(&mut self, pos: (i32, i32)) {
-        *self.get_base().pos.x_mut() = pos.0;
-        *self.get_base().pos.y_mut() = pos.1
+        *self.get_base_mut().pos.x_mut() = pos.0;
+        *self.get_base_mut().pos.y_mut() = pos.1
     }
 
-    fn get_gie(&mut self, name: &str) -> Option<Box<&mut dyn GIE>>
-    where
-        Self: GIE,
-    {
+    fn get_gie(&mut self, name: &str) -> Option<&mut dyn GIE>; /*{
+                                                                   let base = self.get_base();
+                                                                   base.get_gie(name, self)
+                                                               }*/
+    /*where
+    Self: Sized,*/
+    /*{
         if self.get_base().name.as_str() == name {
-            return Some(Box::new(self));
+            return Some(self); // this doesn't work
         }
-        if let Compound { contain } = self.get_base().meta_type {
+        if let Compound { ref contain } = self.get_base().meta_type {
             for gie in contain {
                 return gie.get_gie(name);
             }
         }
         None
-    }
+    }*/
+
+    fn get_type(&mut self) -> &mut dyn Any;
 }
