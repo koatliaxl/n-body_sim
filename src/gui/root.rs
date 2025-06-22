@@ -26,14 +26,9 @@ impl RootGIE {
         }
     }
 
-    pub fn get_gie(&mut self, name: &str) -> Option<&mut dyn GIE>
-/*where
-        Gie: GIE,*/ {
+    pub fn get_gie(&mut self, name: &str) -> Option<&mut dyn GIE> {
         for gie in &mut self.contain {
             return gie.get_gie(name);
-            /*if let some = gie.get_gie(name) {
-                return some;
-            }*/
         }
         None
     }

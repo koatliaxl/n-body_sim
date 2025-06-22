@@ -1,8 +1,9 @@
 use crate::state_and_cfg::RunState::*;
 use crate::state_and_cfg::*;
-use crate::{Msg, World};
+use crate::{update_gui, Msg, World};
 use glfw::Action::{Press, Release /*Repeat*/};
 use glfw::MouseButton::Button1 as LeftButton;
+use glfw::MouseButton::Button2 as RightButton;
 use glfw::WindowEvent::{CursorPos, MouseButton /* as MousePress*/, Scroll, Size};
 use glfw::{Key, Window, WindowEvent};
 //use mat_vec::Vector3;
@@ -39,8 +40,11 @@ pub fn handle_events(
             MouseButton(button, action, _) => {
                 if button == LeftButton && action == Press {
                     state.left_mouse_bt_was_pressed = true;
+                    if /*state.cursor_pos_when_press == state.last_cursor_pos &&*/ state.selected == -1
+                    {
+                        select_obj(state, &world, window.get_size(), gui);
+                    }
                     state.cursor_pos_when_press = state.last_cursor_pos;
-                    select_obj(state, &world, window.get_size(), gui);
                 }
                 if button == LeftButton && action == Release {
                     state.left_mouse_bt_was_pressed = false;
@@ -48,21 +52,25 @@ pub fn handle_events(
                     if window.get_key(Key::C) == Press {
                         create_body(state, window.get_size())
                     }
+                    update_gui(state, world, window.get_size(), gui);
+                }
+                if button == RightButton && action == Press {
+                    state.selected = -1;
                 }
             }
             CursorPos(x, y) => {
                 state.last_cursor_pos = (x, y);
                 if state.left_mouse_bt_was_pressed {
-                    view_pos_changed(&gl_data, state, window.get_size())
+                    view_pos_changed(&gl_data, state, window.get_size(), world, gui)
                 }
             }
             Scroll(_, s) => {
-                state.view_scale -= s as f32 * 0.9;
+                state.view_scale -= s as f32 * 0.8;
                 view_scale_changed(&gl_data, &state, window.get_size())
             }
             WindowEvent::Key(key, _, action, _modifiers) => match key {
                 Key::P | Key::Pause if action == Release => {
-                    println!("key 'P' pressed");
+                    //println!("key 'P' pressed");
                     match state.run_state {
                         Run => state.run_state = Pause,
                         Pause => state.run_state = Run,

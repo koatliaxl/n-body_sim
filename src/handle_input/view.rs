@@ -1,8 +1,18 @@
+use super::select::*;
+use crate::sim::World;
+use crate::update_gui;
 use crate::{GlData, State};
 use mat_vec::{Matrix4x4, Vector3};
 use n_body_sim::gl;
+use n_body_sim::gui::RootGIE;
 
-pub fn view_pos_changed(gl_res: &GlData, state: &mut State, window_size: (i32, i32)) {
+pub fn view_pos_changed(
+    gl_res: &GlData,
+    state: &mut State,
+    window_size: (i32, i32),
+    world: &World,
+    gui: &mut RootGIE,
+) {
     //let last_vec = Vector3::from_tuple(state.last_cursor_pos); //todo: Vector3 from tuple-2 ("as Vector2")
     let (x, y) = state.last_cursor_pos;
     let last_vec = Vector3::new(x, y, 0.0);
@@ -30,6 +40,7 @@ pub fn view_pos_changed(gl_res: &GlData, state: &mut State, window_size: (i32, i
         );
         gl_res.set_uniform_mat4x4("proj_mat", "Text shader", &proj_mat);
     }
+    update_gui(state, world, window_size, gui)
 }
 
 pub fn view_scale_changed(gl_res: &GlData, state: &State, window_size: (i32, i32)) {

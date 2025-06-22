@@ -17,8 +17,6 @@ pub fn draw(gl_res: &GlData, world: &World, state: &State, _window_size: (i32, i
         //gl::LineWidth(2.0);
 
         draw_bodies(gl_res, world, state);
-        /*draw_text(gl_res, "abc 123 DEF", (-150, 110), 1.0);
-        draw_text(gl_res, "OpenGL", (-50, -130), 1.5);*/
     }
 }
 

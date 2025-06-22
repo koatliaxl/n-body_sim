@@ -35,7 +35,7 @@ impl GieBase {
         GieBase {
             pos: Vector3::new(pos.0, pos.1, 0),
             name,
-            visible: false,
+            visible: true,
             meta_type,
         }
     }
@@ -63,9 +63,11 @@ impl GieBase {
 
 pub trait GIE {
     fn draw(&self, gl_data: &GlData, base: &GieBase) {
-        if let Compound { contain } = &base.meta_type {
-            for gie in contain {
-                gie.draw(gl_data, gie.get_base())
+        if base.visible {
+            if let Compound { contain } = &base.meta_type {
+                for gie in contain {
+                    gie.draw(gl_data, gie.get_base())
+                }
             }
         }
     }
@@ -79,23 +81,7 @@ pub trait GIE {
         *self.get_base_mut().pos.y_mut() = pos.1
     }
 
-    fn get_gie(&mut self, name: &str) -> Option<&mut dyn GIE>; /*{
-                                                                   let base = self.get_base();
-                                                                   base.get_gie(name, self)
-                                                               }*/
-    /*where
-    Self: Sized,*/
-    /*{
-        if self.get_base().name.as_str() == name {
-            return Some(self); // this doesn't work
-        }
-        if let Compound { ref contain } = self.get_base().meta_type {
-            for gie in contain {
-                return gie.get_gie(name);
-            }
-        }
-        None
-    }*/
+    fn get_gie(&mut self, name: &str) -> Option<&mut dyn GIE>;
 
     fn get_type(&mut self) -> &mut dyn Any;
 }

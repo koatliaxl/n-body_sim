@@ -15,6 +15,9 @@ mod handle_input;
 mod init;
 mod sim;
 mod state_and_cfg;
+pub mod update;
+
+pub use update::*;
 
 pub enum Msg {
     NewTask { delta_t: f64 },
@@ -37,7 +40,7 @@ fn main() {
     let mut state = State::new(&world.obj_mirror);
     let mut gui = init_gui();
 
-    view_pos_changed(&gl_data, &mut state, window.get_size());
+    view_pos_changed(&gl_data, &mut state, window.get_size(), &world, &mut gui);
     view_scale_changed(&gl_data, &state, window.get_size());
 
     let mut tic_duration = 0.0;
@@ -51,6 +54,7 @@ fn main() {
         }
         let since_last_frame = last_frame_time.elapsed();
         if since_last_frame.as_secs_f64() * 1000.0 >= between_frames || state.run_state != Stop {
+            update_gui(&mut state, &world, window.get_size(), &mut gui);
             draw(&gl_data, &world, &state, window.get_size());
             gui.draw(&gl_data);
             window.swap_buffers();

@@ -38,13 +38,15 @@ impl Label {
 
 impl GIE for Label {
     fn draw(&self, gl_data: &GlData, base: &GieBase) {
-        unsafe {
-            (self.draw_function)(
-                gl_data,
-                &self.text,
-                (base.pos.x(), base.pos.y()),
-                self.text_size,
-            )
+        if base.visible {
+            unsafe {
+                (self.draw_function)(
+                    gl_data,
+                    &self.text,
+                    (base.pos.x(), base.pos.y()),
+                    self.text_size,
+                )
+            }
         }
     }
 
@@ -57,21 +59,10 @@ impl GIE for Label {
     }
 
     fn get_gie(&mut self, name: &str) -> Option<&mut dyn GIE> {
-        /*if self.get_base().name.as_str() == name {
-            return Some(self);
-        }
-        if let Compound { ref contain } = self.get_base().meta_type {
-            for gie in contain {
-                return gie.get_gie(name);
-            }
-        }
-        None*/
-        //let (base, gie_type) = (&mut self.base, &mut self);
         if self.base.name == name {
             return Some(self);
         }
         self.base.get_gie(name)
-        //base.get_gie(name, *gie_type)
     }
 
     fn get_type(&mut self) -> &mut dyn Any {
