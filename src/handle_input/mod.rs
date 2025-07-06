@@ -1,6 +1,6 @@
 use crate::state_and_cfg::RunState::*;
 use crate::state_and_cfg::*;
-use crate::{update_gui, Msg, World};
+use crate::{/*update_gui,*/ Msg, World};
 use glfw::Action::{Press, Release /*Repeat*/};
 use glfw::MouseButton::Button1 as LeftButton;
 use glfw::MouseButton::Button2 as RightButton;
@@ -36,14 +36,15 @@ pub fn handle_events(
 
     for (_, event) in glfw::flush_messages(&events) {
         match event {
-            Size(w, h) => unsafe { gl::Viewport(0, 0, w, h) },
+            Size(w, h) => {
+                unsafe { gl::Viewport(0, 0, w, h) }
+                view_pos_changed(gl_data, state, (w, h), world, gui);
+                view_scale_changed(gl_data, state, (w, h));
+            }
             MouseButton(button, action, _) => {
                 if button == LeftButton && action == Press {
                     state.left_mouse_bt_was_pressed = true;
-                    if /*state.cursor_pos_when_press == state.last_cursor_pos &&*/ state.selected == -1
-                    {
-                        select_obj(state, &world, window.get_size(), gui);
-                    }
+                    select_obj(state, &world, window.get_size(), gui);
                     state.cursor_pos_when_press = state.last_cursor_pos;
                 }
                 if button == LeftButton && action == Release {
@@ -52,7 +53,6 @@ pub fn handle_events(
                     if window.get_key(Key::C) == Press {
                         create_body(state, window.get_size())
                     }
-                    update_gui(state, world, window.get_size(), gui);
                 }
                 if button == RightButton && action == Press {
                     state.selected = -1;
@@ -69,14 +69,11 @@ pub fn handle_events(
                 view_scale_changed(&gl_data, &state, window.get_size())
             }
             WindowEvent::Key(key, _, action, _modifiers) => match key {
-                Key::P | Key::Pause if action == Release => {
-                    //println!("key 'P' pressed");
-                    match state.run_state {
-                        Run => state.run_state = Pause,
-                        Pause => state.run_state = Run,
-                        Stop => state.run_state = Pause,
-                    }
-                }
+                Key::P | Key::Pause if action == Release => match state.run_state {
+                    Run => state.run_state = Pause,
+                    Pause => state.run_state = Run,
+                    Stop => state.run_state = Pause,
+                },
                 Key::C if action == Press => println!("new obj. mass: {}", state.new_obj_mass),
                 Key::Minus if action == Press => {
                     if window.get_key(Key::C) == Press {

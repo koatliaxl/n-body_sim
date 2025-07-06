@@ -5,7 +5,6 @@ use n_body_sim::gui::{Label, RootGIE /*, GIE*/};
 use n_body_sim::Body;
 
 pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32), gui: &mut RootGIE) {
-    state.selected = -1;
     let (x, y) = (
         state.last_cursor_pos.0 as f32,
         state.last_cursor_pos.1 as f32,
@@ -24,9 +23,6 @@ pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32), gui
         let radius = BODY_GFX_SCALE * body.get_radius() as f32;
         if equation_val < (radius / state.view_scale * (w + h) / 2.0).powi(2) {
             state.selected = body.get_id() as i64;
-            //println!("mass: {}", o.mass);
-            //println!("{}, {}", pos_on_scr.x(), pos_on_scr.y());
-            //let world_pos = o.pos;
             update_coord_label(gui, "body_pos_text", pos_on_scr, window_size, body)
         }
     }
@@ -74,7 +70,7 @@ pub fn update_coord_label(
     body: &Body,
 ) {
     let (w, h) = (window_size.0 as f32, window_size.1 as f32);
-    let pos_label/*: &mut Label*/ = gui.get_gie(label_name).unwrap();
+    let pos_label = gui.get_gie(label_name).unwrap();
     pos_label.change_pos((
         (pos_on_scr.x() - w / 2.0) as i32,
         (-pos_on_scr.y() + h / 2.0) as i32,

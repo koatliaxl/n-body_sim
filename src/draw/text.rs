@@ -15,7 +15,7 @@ pub unsafe fn draw_text(gl_res: &GlData, text: &str, pos: (i32, i32), scale: f32
     gl_res.set_uniform_vec3f("text_color", "Text shader", Vector3::new(0.7, 0.3, 0.1));
 
     let mut text_x = pos.0; // in pixels
-    let text_y = pos.1;
+    let text_y = pos.1; // in pixels
     for ch in text.chars() {
         if let Some(glyph) = gl_res.get_glyph(ch) {
             let ch_x = (text_x + glyph.bearing.x()) as f32;

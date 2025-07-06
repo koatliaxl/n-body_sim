@@ -54,7 +54,6 @@ fn main() {
         }
         let since_last_frame = last_frame_time.elapsed();
         if since_last_frame.as_secs_f64() * 1000.0 >= between_frames || state.run_state != Stop {
-            update_gui(&mut state, &world, window.get_size(), &mut gui);
             draw(&gl_data, &world, &state, window.get_size());
             gui.draw(&gl_data);
             window.swap_buffers();
@@ -79,11 +78,14 @@ fn main() {
             update_world(&mut world);
             apply_collisions(&mut world);
             apply_commands(&mut world, &mut state);
+            update_gui(&mut state, &world, window.get_size(), &mut gui);
             update_processed = true;
             state.received = 0
         }
         glfw.poll_events();
         handle_events(&mut window, &events, &mut state, &gl_data, &world, &mut gui);
+        /*if since_last_frame.as_secs_f64() * 1000.0 >= between_frames || state.run_state != Stop {
+        update_gui(&mut state, &world, window.get_size(), &mut gui);}*/
     }
     for jh in state.workers {
         jh.join().expect("failed to join worker");
