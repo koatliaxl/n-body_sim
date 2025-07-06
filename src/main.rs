@@ -40,8 +40,9 @@ fn main() {
     let mut state = State::new(&world.obj_mirror);
     let mut gui = init_gui();
 
-    view_pos_changed(&gl_data, &mut state, window.get_size(), &world, &mut gui);
+    view_pos_changed(&gl_data, &mut state, window.get_size());
     view_scale_changed(&gl_data, &state, window.get_size());
+    window_size_changed(&gl_data, window.get_size());
 
     let mut tic_duration = 0.0;
     let mut update_processed = true;
@@ -55,6 +56,7 @@ fn main() {
         let since_last_frame = last_frame_time.elapsed();
         if since_last_frame.as_secs_f64() * 1000.0 >= between_frames || state.run_state != Stop {
             draw(&gl_data, &world, &state, window.get_size());
+            update_gui(&mut state, &world, window.get_size(), &mut gui);
             gui.draw(&gl_data);
             window.swap_buffers();
             last_frame_time = Instant::now();
@@ -78,14 +80,11 @@ fn main() {
             update_world(&mut world);
             apply_collisions(&mut world);
             apply_commands(&mut world, &mut state);
-            update_gui(&mut state, &world, window.get_size(), &mut gui);
             update_processed = true;
             state.received = 0
         }
         glfw.poll_events();
         handle_events(&mut window, &events, &mut state, &gl_data, &world, &mut gui);
-        /*if since_last_frame.as_secs_f64() * 1000.0 >= between_frames || state.run_state != Stop {
-        update_gui(&mut state, &world, window.get_size(), &mut gui);}*/
     }
     for jh in state.workers {
         jh.join().expect("failed to join worker");

@@ -84,6 +84,6 @@ pub unsafe fn init_pos_tex_dyn_draw(gl_data: &mut GlData) {
     );
     gl::EnableVertexAttribArray(1);
 
-    gl_data.add_vertex_buffer_gl_id("Quad", vertex_buf);
+    gl_data.add_vertex_buffer_gl_id("dynamic-24", vertex_buf);
     gl_data.add_vertex_array_gl_id("Position and Texture", vertex_array);
 }

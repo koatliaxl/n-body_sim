@@ -84,7 +84,7 @@ pub fn init_shaders(gl_data: &mut GlData) {
         let obj_vertex = gen_shader_from_file(
             "shaders/obj_vertex.glsl",
             VERTEX_SHADER,
-            "Object vertex shader",
+            "Body vertex shader",
         );
         /*let obj_geom = gen_shader_from_file(
             "shaders/obj_geom.glsl",
@@ -94,18 +94,18 @@ pub fn init_shaders(gl_data: &mut GlData) {
         let obj_frag = gen_shader_from_file(
             "shaders/obj_frag.glsl",
             FRAGMENT_SHADER,
-            "Object fragment shader",
+            "Body fragment shader",
         );
-        let obj_shader = gen_shader_program(obj_vertex, obj_frag, "Object shader");
+        let obj_shader = gen_shader_program(obj_vertex, obj_frag, "Body shader");
         /*let shd_program =
         gen_geometry_shader_program(obj_vertex, obj_geom, obj_frag, "Object shader");*/
-        gl_data.add_shader_gl_id("Object shader", obj_shader);
+        gl_data.add_shader_gl_id("Body shader", obj_shader);
         let view_mat = gl::GetUniformLocation(obj_shader, "view_mat\0".as_ptr() as *const i8);
         let model_mat = gl::GetUniformLocation(obj_shader, "model_mat\0".as_ptr() as *const i8);
         let proj_mat = gl::GetUniformLocation(obj_shader, "proj_mat\0".as_ptr() as *const i8);
-        gl_data.add_variable_location("Object shader", "view_mat", view_mat);
-        gl_data.add_variable_location("Object shader", "model_mat", model_mat);
-        gl_data.add_variable_location("Object shader", "proj_mat", proj_mat);
+        gl_data.add_variable_location("Body shader", "view_mat", view_mat);
+        gl_data.add_variable_location("Body shader", "model_mat", model_mat);
+        gl_data.add_variable_location("Body shader", "proj_mat", proj_mat);
 
         let text_vertex = gen_shader_from_file(
             "shaders/text_vertex.glsl",

@@ -4,9 +4,8 @@ use crate::{/*update_gui,*/ Msg, World};
 use glfw::Action::{Press, Release /*Repeat*/};
 use glfw::MouseButton::Button1 as LeftButton;
 use glfw::MouseButton::Button2 as RightButton;
-use glfw::WindowEvent::{CursorPos, MouseButton /* as MousePress*/, Scroll, Size};
+use glfw::WindowEvent::{CursorPos, MouseButton, Scroll, Size};
 use glfw::{Key, Window, WindowEvent};
-//use mat_vec::Vector3;
 use n_body_sim::{gl, GlData};
 use std::sync::mpsc::Receiver;
 
@@ -38,8 +37,9 @@ pub fn handle_events(
         match event {
             Size(w, h) => {
                 unsafe { gl::Viewport(0, 0, w, h) }
-                view_pos_changed(gl_data, state, (w, h), world, gui);
+                view_pos_changed(gl_data, state, (w, h) /*, world*//*, gui*/);
                 view_scale_changed(gl_data, state, (w, h));
+                window_size_changed(gl_data, (w, h));
             }
             MouseButton(button, action, _) => {
                 if button == LeftButton && action == Press {
@@ -61,7 +61,7 @@ pub fn handle_events(
             CursorPos(x, y) => {
                 state.last_cursor_pos = (x, y);
                 if state.left_mouse_bt_was_pressed {
-                    view_pos_changed(&gl_data, state, window.get_size(), world, gui)
+                    view_pos_changed(&gl_data, state, window.get_size() /*world,*/ /*gui*/)
                 }
             }
             Scroll(_, s) => {

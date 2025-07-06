@@ -37,7 +37,7 @@ pub unsafe fn draw_text(gl_res: &GlData, text: &str, pos: (i32, i32), scale: f32
                 }
             }
             gl::BindTexture(gl::TEXTURE_2D, glyph.texture_id);
-            let vertex_buf = gl_res.get_vertex_buffer_gl_id("Quad");
+            let vertex_buf = gl_res.get_vertex_buffer_gl_id("dynamic-24");
             gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);
             gl::BufferSubData(
                 gl::ARRAY_BUFFER,
