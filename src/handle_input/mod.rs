@@ -24,7 +24,7 @@ pub fn handle_events(
     state: &mut State,
     gl_data: &GlData,
     world: &World,
-    gui: &mut RootGIE,
+    _gui: &mut RootGIE,
 ) {
     if window.get_key(Key::Escape) == Press {
         window.set_should_close(true);
@@ -44,7 +44,7 @@ pub fn handle_events(
             MouseButton(button, action, _) => {
                 if button == LeftButton && action == Press {
                     state.left_mouse_bt_was_pressed = true;
-                    select_obj(state, &world, window.get_size(), gui);
+                    select_obj(state, &world, window.get_size() /*, gui*/);
                     state.cursor_pos_when_press = state.last_cursor_pos;
                 }
                 if button == LeftButton && action == Release {
@@ -66,7 +66,8 @@ pub fn handle_events(
             }
             Scroll(_, s) => {
                 state.view_scale -= s as f32 * 0.8;
-                view_scale_changed(&gl_data, &state, window.get_size())
+                view_scale_changed(&gl_data, &state, window.get_size());
+                state.update_ui_requested = true;
             }
             WindowEvent::Key(key, _, action, _modifiers) => match key {
                 Key::P | Key::Pause if action == Release => match state.run_state {

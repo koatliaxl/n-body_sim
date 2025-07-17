@@ -41,6 +41,8 @@ pub struct State {
     pub selected: i64,
     pub new_obj_mass: f64,
     pub command_queue: VecDeque<Command>,
+    //pub redraw_requested: bool,
+    pub update_ui_requested: bool,
 }
 
 pub enum Command {
@@ -102,6 +104,8 @@ impl State {
             selected: -1,
             new_obj_mass: 1.0,
             command_queue: VecDeque::new(),
+            //redraw_requested: false,
+            update_ui_requested: false,
         }
     }
 }

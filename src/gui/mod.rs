@@ -53,8 +53,9 @@ impl GieBase {
         }*/
         if let Compound { ref mut contain } = self.meta_type {
             for gie in contain {
-                //return gie.get_base_mut().get_gie(name, self);
-                return gie.get_gie(name);
+                if let Some(g) = gie.get_gie(name) {
+                    return Some(g);
+                }
             }
         }
         None

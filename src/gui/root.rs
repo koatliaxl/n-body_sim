@@ -28,7 +28,9 @@ impl RootGIE {
 
     pub fn get_gie(&mut self, name: &str) -> Option<&mut dyn GIE> {
         for gie in &mut self.contain {
-            return gie.get_gie(name);
+            if let Some(g) = gie.get_gie(name) {
+                return Some(g);
+            }
         }
         None
     }

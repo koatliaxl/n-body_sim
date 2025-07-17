@@ -40,6 +40,7 @@ pub fn view_pos_changed(
         );
         gl_res.set_uniform_mat4x4("proj_mat", "Text shader", &proj_mat);*/
     }
+    state.update_ui_requested = true;
     //update_gui(state, world, window_size, gui)
 }
 

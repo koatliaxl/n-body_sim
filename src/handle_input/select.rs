@@ -4,7 +4,11 @@ use mat_vec::{Matrix4x4, Vector3, Vector4};
 use n_body_sim::gui::{Label, RootGIE /*, GIE*/};
 use n_body_sim::Body;
 
-pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32), gui: &mut RootGIE) {
+pub fn select_obj(
+    state: &mut State,
+    world: &World,
+    window_size: (i32, i32), /*gui: &mut RootGIE*/
+) {
     let (x, y) = (
         state.last_cursor_pos.0 as f32,
         state.last_cursor_pos.1 as f32,
@@ -23,7 +27,7 @@ pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32), gui
         let radius = BODY_GFX_SCALE * body.get_radius() as f32;
         if equation_val < (radius / state.view_scale * (w + h) / 2.0).powi(2) {
             state.selected = body.get_id() as i64;
-            update_coord_label(gui, "body_pos_text", pos_on_scr, window_size, body)
+            state.update_ui_requested = true
         }
     }
 }
@@ -50,7 +54,7 @@ pub fn calc_body_pos_on_screen(
     view_mat: &Matrix4x4<f32>,
     proj_mat: &Matrix4x4<f32>,
     body: &Body,
-) -> Vector4<f32> {
+) -> Vector3<f32> {
     let (w, h) = (window_size.0 as f32, window_size.1 as f32);
     let (ox, oy, _) = body.pos.get_components();
     let pos_vec4 = Vector4::new(ox as f32, oy as f32, 0.0, 1.0);
@@ -59,26 +63,44 @@ pub fn calc_body_pos_on_screen(
     let mut pos_on_scr = proj_mat.clone() * view_mat.clone() * pos_vec4;
     pos_on_scr.set_x((pos_on_scr.x() + 1.0) * 0.5 * w);
     pos_on_scr.set_y((1.0 - pos_on_scr.y()) * 0.5 * h);
-    pos_on_scr
+    pos_on_scr.into()
 }
 
-pub fn update_coord_label(
-    gui: &mut RootGIE,
-    label_name: &str,
-    pos_on_scr: Vector4<f32>,
-    window_size: (i32, i32),
-    body: &Body,
-) {
+pub fn normalize_screen_coords(pos_on_scr: Vector3<f32>, window_size: (i32, i32)) -> (i32, i32) {
     let (w, h) = (window_size.0 as f32, window_size.1 as f32);
-    let pos_label = gui.get_gie(label_name).unwrap();
-    pos_label.change_pos((
+    (
         (pos_on_scr.x() - w / 2.0) as i32,
         (-pos_on_scr.y() + h / 2.0) as i32,
-    ));
+    )
+}
+
+pub fn update_selected_info(
+    gui: &mut RootGIE,
+    //label_name: &str,
+    mut pos_on_scr: (i32, i32),
+    //window_size: (i32, i32),
+    body: &Body,
+) {
+    //let (w, h) = (window_size.0 as f32, window_size.1 as f32);
+    let pos_label = gui.get_gie("body_pos_text").unwrap();
+    /*pos_label.change_pos((
+        (pos_on_scr.x() - w / 2.0) as i32,
+        (-pos_on_scr.y() + h / 2.0) as i32,
+    ));*/
+    pos_label.change_pos(pos_on_scr);
     pos_label
         .get_type()
         .downcast_mut::<Label>()
         .expect("failed to downcast GIE as Label")
         .change_text(format!("{:.2}, {:.2}", body.pos.x(), body.pos.y()));
-    pos_label.get_base_mut().visible = true
+    pos_label.get_base_mut().visible = true;
+    let mass_label = gui.get_gie("body_mass_text").unwrap();
+    pos_on_scr.1 -= 15;
+    mass_label.change_pos(pos_on_scr);
+    mass_label
+        .get_type()
+        .downcast_mut::<Label>()
+        .expect("failed to downcast GIE as Label")
+        .change_text(format!("mass: {}", body.mass));
+    mass_label.get_base_mut().visible = true;
 }
