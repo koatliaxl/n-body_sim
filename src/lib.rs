@@ -18,11 +18,9 @@ pub mod gl {
 
 pub mod gl_data;
 pub mod gui;
+pub mod support;
 #[cfg(test)]
 mod tests;
-pub mod support {
-    pub mod id_table;
-}
 
 pub struct Body {
     pub pos: Vector3<f64>,

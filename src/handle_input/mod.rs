@@ -66,6 +66,7 @@ pub fn handle_events(
             }
             Scroll(_, s) => {
                 state.view_scale -= s as f32 * 0.8;
+                //println!("view scale: {}", state.view_scale);
                 view_scale_changed(&gl_data, &state, window.get_size());
                 state.update_ui_requested = true;
             }

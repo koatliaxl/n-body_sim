@@ -66,7 +66,7 @@ pub fn calc_body_pos_on_screen(
     pos_on_scr.into()
 }
 
-pub fn normalize_screen_coords(pos_on_scr: Vector3<f32>, window_size: (i32, i32)) -> (i32, i32) {
+pub fn fix_screen_pos(pos_on_scr: Vector3<f32>, window_size: (i32, i32)) -> (i32, i32) {
     let (w, h) = (window_size.0 as f32, window_size.1 as f32);
     (
         (pos_on_scr.x() - w / 2.0) as i32,
@@ -74,19 +74,8 @@ pub fn normalize_screen_coords(pos_on_scr: Vector3<f32>, window_size: (i32, i32)
     )
 }
 
-pub fn update_selected_info(
-    gui: &mut RootGIE,
-    //label_name: &str,
-    mut pos_on_scr: (i32, i32),
-    //window_size: (i32, i32),
-    body: &Body,
-) {
-    //let (w, h) = (window_size.0 as f32, window_size.1 as f32);
+pub fn update_selected_info(gui: &mut RootGIE, mut pos_on_scr: (i32, i32), body: &Body) {
     let pos_label = gui.get_gie("body_pos_text").unwrap();
-    /*pos_label.change_pos((
-        (pos_on_scr.x() - w / 2.0) as i32,
-        (-pos_on_scr.y() + h / 2.0) as i32,
-    ));*/
     pos_label.change_pos(pos_on_scr);
     pos_label
         .get_type()
