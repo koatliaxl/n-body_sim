@@ -8,9 +8,7 @@ use std::thread;
 use std::thread::JoinHandle;
 use std::time::Instant;
 
-/*pub use gl_data::*;
-
-pub mod gl_data;*/
+//static NUM_THREADS: u64 =
 
 #[derive(PartialEq)]
 pub enum RunState {
@@ -43,6 +41,11 @@ pub struct State {
     pub command_queue: VecDeque<Command>,
     //pub redraw_requested: bool,
     pub update_ui_requested: bool,
+    pub prediction: Prediction,
+}
+
+struct Prediction {
+    trajectory: Vec<Vector3<f64>>,
 }
 
 pub enum Command {
@@ -106,10 +109,21 @@ impl State {
             command_queue: VecDeque::new(),
             //redraw_requested: false,
             update_ui_requested: false,
+            prediction: Prediction {
+                trajectory: Vec::new(),
+            },
         }
     }
 }
 
-/*struct Config {
+pub struct Config {
+    pub prediction_steps: u32,
+}
 
-}*/
+impl Config {
+    pub fn new() -> Config {
+        Config {
+            prediction_steps: 10,
+        }
+    }
+}

@@ -8,13 +8,25 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 pub use parallel::*;
+pub use predict::*;
 
 mod parallel;
+mod predict;
 
 pub struct World {
     pub bodies: Arc<Mutex<Vec<Body>>>,
     pub forces: Vec<Vector3<f64>>,
     pub obj_mirror: Vec<Arc<Mutex<ObjBuffer>>>,
+}
+
+impl World {
+    pub fn clone(&self) -> World {
+        let lock = self.bodies.lock();
+        let guard = lock.execept("lock mus be acquired while copying world");
+        /*for body in *guard.iter() {
+
+        }*/
+    }
 }
 
 pub struct ObjBuffer {

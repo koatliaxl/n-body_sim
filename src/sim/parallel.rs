@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use n_body_sim::SuspectCollChange::*;
 use std::sync::{Arc, Mutex};
 
-pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) {
+pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>, _prediction_mode: bool) {
     loop {
         let msg = th_cfg
             .receiver

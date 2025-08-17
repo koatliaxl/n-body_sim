@@ -39,6 +39,7 @@ fn main() {
     init_glyphs(&mut gl_data);
     let mut state = State::new(&world.obj_mirror);
     let mut gui = init_gui();
+    let cfg = Config::new();
 
     view_pos_changed(&gl_data, &mut state, window.get_size());
     view_scale_changed(&gl_data, &state, window.get_size());
@@ -58,6 +59,9 @@ fn main() {
         /*|| state.redraw_requested*/
         {
             draw(&gl_data, &world, &state, window.get_size());
+            if state.selected >= 0 {
+                predict(&world, &mut state, &cfg, tic_duration / 1000.0);
+            }
             gui.draw(&gl_data);
             window.swap_buffers();
             last_frame_time = Instant::now();
