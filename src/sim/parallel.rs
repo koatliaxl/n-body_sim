@@ -7,13 +7,20 @@ use std::collections::HashMap;
 use n_body_sim::SuspectCollChange::*;
 use std::sync::{Arc, Mutex};
 
-pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>, _prediction_mode: bool) {
+pub fn compute_in_parallel(
+    th_cfg: ThreadConfig,
+    mirror: Arc<Mutex<ObjBuffer>>, /*, _prediction_mode: bool*/
+) {
     loop {
         let msg = th_cfg
             .receiver
             .recv()
             .expect("Worker: channel disconnected");
-        if let Msg::NewTask { delta_t } = msg {
+        if let Msg::NewTask {
+            delta_t,
+            prediction_mode,
+        } = msg
+        {
             let lock = mirror.lock();
             let mut guard = lock.expect("Worker: lock not acquired");
             let ObjBuffer {
@@ -23,17 +30,31 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>, 
                 task,
                 begin,
                 ref mut collisions,
+                ref prediction_state,
             } = *guard;
-            let bodies = bodies
-                .lock()
-                .expect("Worker: lock not acquired for parallel read");
 
             collisions.clear();
-            prepare_changes(&bodies, changes, task, begin);
-            compute_forces(&bodies, changes, forces, /*task, begin,*/ collisions);
-            check_suspicion_hitboxes(&bodies, changes, delta_t);
-            move_bodies(changes, forces, delta_t /*, task, begin*/);
-            check_for_collisions(&bodies, changes, collisions);
+            if !prediction_mode {
+                let bodies = bodies
+                    .lock()
+                    .expect("Worker: lock not acquired for parallel read");
+
+                prepare_changes(&bodies, changes, task, begin);
+                compute_forces(&bodies, changes, forces, collisions);
+                check_suspicion_hitboxes(&bodies, changes, delta_t);
+                move_bodies(changes, forces, delta_t);
+                check_for_collisions(&bodies, changes, collisions);
+            } else {
+                let pred_state = prediction_state
+                    .lock()
+                    .expect("Worker: lock must be acquired on prediction  state");
+
+                prepare_changes(&pred_state, changes, task, begin);
+                compute_forces(&pred_state, changes, forces, collisions);
+                check_suspicion_hitboxes(&pred_state, changes, delta_t);
+                move_bodies(changes, forces, delta_t);
+                check_for_collisions(&pred_state, changes, collisions);
+            }
 
             th_cfg
                 .sender

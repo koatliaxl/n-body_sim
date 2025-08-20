@@ -20,7 +20,7 @@ pub mod update;
 pub use update::*;
 
 pub enum Msg {
-    NewTask { delta_t: f64 },
+    NewTask { delta_t: f64, prediction_mode: bool },
     TaskFinished,
     Exit,
 }
@@ -34,10 +34,10 @@ fn main() {
     init_open_gl(window.get_size());
     init_shaders(&mut gl_data);
     let num_of_threads = 3;
-    let mut world = init_world(num_of_threads);
+    let (mut world, prediction) = init_world(num_of_threads);
     init_draw(&mut gl_data);
     init_glyphs(&mut gl_data);
-    let mut state = State::new(&world.obj_mirror);
+    let mut state = State::new(&world.obj_mirror, prediction);
     let mut gui = init_gui();
     let cfg = Config::new();
 

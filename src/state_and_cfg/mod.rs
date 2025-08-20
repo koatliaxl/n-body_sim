@@ -1,13 +1,13 @@
+use crate::sim::World;
 use crate::{compute_in_parallel, Msg, ObjBuffer};
 use mat_vec::Vector3;
-use n_body_sim::BodyType;
+use n_body_sim::{Body, BodyType};
 use std::collections::VecDeque;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 use std::thread::JoinHandle;
 use std::time::Instant;
-
 //static NUM_THREADS: u64 =
 
 #[derive(PartialEq)]
@@ -44,8 +44,9 @@ pub struct State {
     pub prediction: Prediction,
 }
 
-struct Prediction {
-    trajectory: Vec<Vector3<f64>>,
+pub struct Prediction {
+    pub trajectory: Vec<Vector3<f64>>,
+    pub state: World,
 }
 
 pub enum Command {
@@ -67,7 +68,10 @@ pub struct ThreadConfig {
 }
 
 impl State {
-    pub fn new(/*number_of_threads: u32*/ data_mirrors: &Vec<Arc<Mutex<ObjBuffer>>>) -> State {
+    pub fn new(
+        /*number_of_threads: u32*/ data_mirrors: &Vec<Arc<Mutex<ObjBuffer>>>,
+        prediction_holder: World,
+    ) -> State {
         let mut to_workers = Vec::new();
         let mut jh_vec = Vec::new();
         let (to_main, from_workers) = mpsc::channel();
@@ -111,6 +115,7 @@ impl State {
             update_ui_requested: false,
             prediction: Prediction {
                 trajectory: Vec::new(),
+                state: prediction_holder,
             },
         }
     }
