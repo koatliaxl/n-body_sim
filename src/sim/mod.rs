@@ -45,7 +45,7 @@ pub struct ObjBuffer {
     pub prediction_state: Arc<Mutex<Vec<Body>>>,
 }
 
-pub fn begin_next_step(world: &mut World, delta_t: f64, state: &State, prediction_mode: bool) {
+pub fn begin_next_step(world: &World, delta_t: f64, state: &State, prediction_mode: bool) {
     let bodies = world.bodies.lock().expect("Main: failed to acquire lock");
     let tasks = split_task_length(bodies.len(), state.workers.len());
     let mut offset = 0;
@@ -77,7 +77,7 @@ pub fn check_if_tasks_finished(state: &mut State) {
     }
 }
 
-pub fn update_world(world: &mut World) {
+pub fn update_world(world: &World) {
     let mut bodies = world
         .bodies
         .lock()
@@ -97,7 +97,7 @@ pub fn update_world(world: &mut World) {
     }
 }
 
-pub fn apply_collisions(world: &mut World) {
+pub fn apply_collisions(world: &World) {
     let mut bodies = world
         .bodies
         .lock()

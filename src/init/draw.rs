@@ -87,3 +87,32 @@ pub unsafe fn init_pos_tex_dyn_draw(gl_data: &mut GlData) {
     gl_data.add_vertex_buffer_gl_id("dynamic-24", vertex_buf);
     gl_data.add_vertex_array_gl_id("Position and Texture", vertex_array);
 }
+
+pub unsafe fn init_pos_dynamic_draw(gl_data: &mut GlData) {
+    let mut vertex_buf = 0;
+    gl::GenBuffers(1, &mut vertex_buf);
+    gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);
+    gl::BufferData(
+        gl::ARRAY_BUFFER,
+        10 * SIZE_OF_GL_FLOAT,
+        0 as *const c_void,
+        gl::DYNAMIC_DRAW,
+    );
+
+    let mut vertex_array = 0;
+    gl::GenVertexArrays(1, &mut vertex_array);
+    gl::BindVertexArray(vertex_array);
+    let position_attrib_len = 2;
+    gl::VertexAttribPointer(
+        0,
+        position_attrib_len,
+        gl::FLOAT,
+        gl::FALSE,
+        SIZE_OF_GL_FLOAT as i32 * (position_attrib_len),
+        0 as *const c_void,
+    );
+    gl::EnableVertexAttribArray(0);
+
+    gl_data.add_vertex_buffer_gl_id("dynamic-10", vertex_buf);
+    gl_data.add_vertex_array_gl_id("dynamic_only_position", vertex_array);
+}

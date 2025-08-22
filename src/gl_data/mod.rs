@@ -1,5 +1,5 @@
 use crate::gl;
-use mat_vec::{Matrix4x4, Vector3};
+use mat_vec::{Matrix4x4, Vector3, Vector4};
 use std::collections::HashMap;
 
 pub struct GlData {
@@ -110,6 +110,12 @@ impl GlData {
         let var_location = self.get_variable_location(shader_program, name);
         let (v1, v2, v3) = vec.get_components();
         gl::Uniform3f(var_location, v1, v2, v3);
+    }
+
+    pub unsafe fn set_uniform_vec4f(&self, name: &str, shader_program: &str, vec: Vector4<f32>) {
+        let var_location = self.get_variable_location(shader_program, name);
+        let (v1, v2, v3, v4) = vec.get_components();
+        gl::Uniform4f(var_location, v1, v2, v3, v4);
     }
 
     pub unsafe fn set_uniform_mat4x4(

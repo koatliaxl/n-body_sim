@@ -76,7 +76,7 @@ fn main() {
             && state.run_state == Run
             && update_processed
         {
-            begin_next_step(&mut world, tic_duration / 1000.0, &mut state);
+            begin_next_step(&mut world, tic_duration / 1000.0, &mut state, false);
             state.last_upd_time = Instant::now();
             update_processed = false
         }

@@ -91,21 +91,23 @@ pub fn init_shaders(gl_data: &mut GlData) {
             GEOMETRY_SHADER,
             "Object geometry shader",
         );*/
-        let obj_frag = gen_shader_from_file(
-            "shaders/obj_frag.glsl",
+        let simple_frag = gen_shader_from_file(
+            "shaders/simple_color_frag.glsl",
             FRAGMENT_SHADER,
-            "Body fragment shader",
+            "Simple color shader",
         );
-        let obj_shader = gen_shader_program(obj_vertex, obj_frag, "Body shader");
+        let obj_shader = gen_shader_program(obj_vertex, simple_frag, "Body shader");
         /*let shd_program =
         gen_geometry_shader_program(obj_vertex, obj_geom, obj_frag, "Object shader");*/
         gl_data.add_shader_gl_id("Body shader", obj_shader);
         let view_mat = gl::GetUniformLocation(obj_shader, "view_mat\0".as_ptr() as *const i8);
         let model_mat = gl::GetUniformLocation(obj_shader, "model_mat\0".as_ptr() as *const i8);
         let proj_mat = gl::GetUniformLocation(obj_shader, "proj_mat\0".as_ptr() as *const i8);
+        let color = gl::GetUniformLocation(obj_shader, "color\0".as_ptr() as *const i8);
         gl_data.add_variable_location("Body shader", "view_mat", view_mat);
         gl_data.add_variable_location("Body shader", "model_mat", model_mat);
         gl_data.add_variable_location("Body shader", "proj_mat", proj_mat);
+        gl_data.add_variable_location("Body shader", "color", color);
 
         let text_vertex = gen_shader_from_file(
             "shaders/text_vertex.glsl",
@@ -128,10 +130,27 @@ pub fn init_shaders(gl_data: &mut GlData) {
         gl_data.add_variable_location("Text shader", "text_color", text_color);
         gl_data.add_variable_location("Text shader", "pos_mat", pos_mat);
 
+        let traj_vertex = gen_shader_from_file(
+            "shaders/traj_vertex.glsl",
+            VERTEX_SHADER,
+            "Trajectory vertex shader",
+        );
+        let traj_shader = gen_shader_program(traj_vertex, simple_frag, "Trajectory shader");
+        gl_data.add_shader_gl_id("Trajectory shader", traj_shader);
+        let color = gl::GetUniformLocation(traj_shader, "color\0".as_ptr() as *const i8);
+        let model_mat = gl::GetUniformLocation(traj_shader, "model_mat\0".as_ptr() as *const i8);
+        let view_mat = gl::GetUniformLocation(traj_shader, "view_mat\0".as_ptr() as *const i8);
+        let proj_mat = gl::GetUniformLocation(traj_shader, "proj_mat\0".as_ptr() as *const i8);
+        gl_data.add_variable_location("Trajectory shader", "color", color);
+        gl_data.add_variable_location("Trajectory shader", "model", model_mat);
+        gl_data.add_variable_location("Trajectory shader", "proj_mat", proj_mat);
+        gl_data.add_variable_location("Trajectory shader", "view_mat", view_mat);
+
         gl::DeleteShader(obj_vertex);
         //gl::DeleteShader(obj_geom);
-        gl::DeleteShader(obj_frag);
+        gl::DeleteShader(simple_frag);
         gl::DeleteShader(text_vertex);
         gl::DeleteShader(text_frag);
+        gl::DeleteShader(traj_vertex);
     }
 }
