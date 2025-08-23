@@ -17,6 +17,7 @@ pub fn draw(gl_res: &GlData, world: &World, state: &State, _window_size: (i32, i
         //gl::LineWidth(2.0);
 
         draw_bodies(gl_res, world, state);
+        draw_trajectory(gl_res, world, state);
     }
 }
 
@@ -51,11 +52,9 @@ unsafe fn draw_bodies(gl_res: &GlData, world: &World, state: &State) {
     }
 }
 
-unsafe fn draw_trajectory(gl_res: &GlData, world: &World, state: &State) {
+unsafe fn draw_trajectory(gl_res: &GlData, _world: &World, state: &State) {
     let shader = gl_res.get_shader_gl_id("Trajectory shader");
     gl::UseProgram(shader);
-    /*let vertex_buf = gl_res.get_vertex_buffer_gl_id("dynamic");
-    gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);  */
     let vertex_arr = gl_res.get_vertex_array_gl_id("dynamic_only_position");
     gl::BindVertexArray(vertex_arr);
 
@@ -70,13 +69,14 @@ unsafe fn draw_trajectory(gl_res: &GlData, world: &World, state: &State) {
     let mut trajectory_buf = [0.0_f32; 10];
     let mut s = 0;
     let mut i = 0;
+    //println!("{}", state.prediction.trajectory.len());
     while s < state.prediction.trajectory.len() {
         let (x, y, _) = state.prediction.trajectory[s].get_components();
         trajectory_buf[i] = x as f32;
         trajectory_buf[i + 1] = y as f32;
         s += 1;
         i += 2;
-        if i >= 10 {
+        if i >= 10 || s == state.prediction.trajectory.len() - 1 {
             i = 0;
             gl::BufferSubData(
                 gl::ARRAY_BUFFER,
@@ -86,6 +86,8 @@ unsafe fn draw_trajectory(gl_res: &GlData, world: &World, state: &State) {
             );
             gl::DrawArrays(gl::LINE_STRIP, 0, 5)
         }
+        println!("inside traj. draw loop ({}, {})", s, i)
     }
     gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+    //println!("exited from traj. draw loop")
 }

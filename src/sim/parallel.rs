@@ -45,10 +45,12 @@ pub fn compute_in_parallel(
                 move_bodies(changes, forces, delta_t);
                 check_for_collisions(&bodies, changes, collisions);
             } else {
+                println!("worker: before lock");
                 let pred_state = prediction_state
                     .lock()
-                    .expect("Worker: lock must be acquired on prediction  state");
+                    .expect("Worker: lock must be acquired on prediction state");
 
+                println!("worker: lock acquired");
                 prepare_changes(&pred_state, changes, task, begin);
                 compute_forces(&pred_state, changes, forces, collisions);
                 check_suspicion_hitboxes(&pred_state, changes, delta_t);
@@ -60,6 +62,7 @@ pub fn compute_in_parallel(
                 .sender
                 .send(Msg::TaskFinished)
                 .expect("Worker: failed to send msg.");
+            println!("worker: task finished");
         } else if let Msg::Exit = msg {
             break;
         } else {

@@ -1,7 +1,7 @@
 use crate::sim::World;
 use crate::{compute_in_parallel, Msg, ObjBuffer};
 use mat_vec::Vector3;
-use n_body_sim::{Body, BodyType};
+use n_body_sim::BodyType;
 use std::collections::VecDeque;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc, Mutex};

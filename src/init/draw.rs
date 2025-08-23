@@ -7,7 +7,8 @@ use std::ffi::c_void;
 pub fn init_draw(gl_data: &mut GlData) {
     unsafe {
         init_obj(gl_data);
-        init_pos_tex_dyn_draw(gl_data)
+        init_pos_tex_dyn_draw(gl_data);
+        init_pos_dynamic_draw(gl_data);
     }
 }
 
