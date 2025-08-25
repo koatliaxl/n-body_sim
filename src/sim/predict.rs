@@ -1,17 +1,19 @@
-use n_body_sim::BodyType::Removed;
 use crate::state_and_cfg::Prediction;
 use crate::{
     apply_collisions, begin_next_step, check_if_tasks_finished, update_world, Config, State, World,
 };
+use n_body_sim::BodyType::Removed;
 
 pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
     let State {
-        prediction: Prediction {
-            trajectory,
-            state: predicted, ..
-        },
+        prediction:
+            Prediction {
+                trajectory,
+                state: predicted,
+                ..
+            },
         ..
-    } =state;
+    } = state;
     /*let Prediction {
         state: predicted,
         ..
@@ -35,11 +37,15 @@ pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
     'outer: for _ in 0..cfg.prediction_steps {
         println!("inside prediction loop");
         begin_next_step(&state.prediction.state, delta, state, true);
-        while state.received < state.workers.len() {
+        //let mut last = 0;
+        while state.prediction.task_done_count < state.workers.len() {
             check_if_tasks_finished(state);
-            //println!("inside check finish task loop");
+            /*if state.task_done_count > last {
+                last += 1;
+                println!("task finished received {}", state.task_done_count);
+            }*/
         }
-        state.received = 0;
+        state.prediction.task_done_count = 0;
 
         let State {
             ref selected,
@@ -66,7 +72,7 @@ pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
                 if body.get_id() == *selected as u64 {
                     if body.class == Removed {
                         //apply_collisions(predicted);
-                        break 'inner
+                        break 'inner;
                     }
                     /*if i>0 {
                         let last_pos = if let Some(v) = state.prediction.trajectory.last() {
@@ -78,7 +84,7 @@ pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
                     }*/
                     trajectory.push(body.pos);
                     println!("trajectory len: {}", trajectory.len());
-                    break 'inner
+                    break 'inner;
                 }
             }
         }

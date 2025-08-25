@@ -58,11 +58,28 @@ pub fn begin_next_step(world: &World, delta_t: f64, state: &State, prediction_mo
 
 pub fn check_if_tasks_finished(state: &mut State) {
     if let Ok(msg) = state.from_workers.try_recv() {
-        if let Msg::TaskFinished = msg {
-            state.received += 1;
+        match msg {
+            Msg::TaskFinished {
+                prediction_mode: false,
+            } => state.task_done_count += 1,
+            Msg::TaskFinished {
+                prediction_mode: true,
+            } => state.prediction.task_done_count += 1,
+            _ => panic!("Main: received wrong message"),
+        }
+        /*if let Msg::TaskFinished {
+            prediction_mode: false,
+        } = msg
+        {
+            state.task_done_count += 1;
+        } else if let Msg::TaskFinished {
+            prediction_mode: true,
+        } = msg
+        {
+            state.prediction.task_done_count += 1;
         } else {
             panic!("Main: received wrong message")
-        }
+        }*/
     }
 }
 

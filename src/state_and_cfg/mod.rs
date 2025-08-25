@@ -34,7 +34,7 @@ pub struct State {
     pub run_state: RunState,
     pub to_workers: Vec<Sender<Msg>>,
     pub from_workers: Receiver<Msg>,
-    pub received: usize,
+    pub task_done_count: usize,
     pub workers: Vec<JoinHandle<()>>,
     pub selected: i64,
     pub new_obj_mass: f64,
@@ -47,6 +47,7 @@ pub struct State {
 pub struct Prediction {
     pub trajectory: Vec<Vector3<f64>>,
     pub state: World,
+    pub task_done_count: usize,
 }
 
 pub enum Command {
@@ -106,7 +107,7 @@ impl State {
             run_state: RunState::Run,
             to_workers,
             from_workers,
-            received: 0,
+            task_done_count: 0,
             workers: jh_vec,
             selected: -1,
             new_obj_mass: 1.0,
@@ -116,6 +117,7 @@ impl State {
             prediction: Prediction {
                 trajectory: Vec::new(),
                 state: prediction_holder,
+                task_done_count: 0
             },
         }
     }

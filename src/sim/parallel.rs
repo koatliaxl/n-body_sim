@@ -35,10 +35,12 @@ pub fn compute_in_parallel(
 
             collisions.clear();
             if !prediction_mode {
+                println!("worker: before lock (not prediction)");
                 let bodies = bodies
                     .lock()
                     .expect("Worker: lock not acquired for parallel read");
 
+                println!("worker: lock acquired (not prediction)");
                 prepare_changes(&bodies, changes, task, begin);
                 compute_forces(&bodies, changes, forces, collisions);
                 check_suspicion_hitboxes(&bodies, changes, delta_t);
@@ -57,12 +59,11 @@ pub fn compute_in_parallel(
                 move_bodies(changes, forces, delta_t);
                 check_for_collisions(&pred_state, changes, collisions);
             }
-
+            println!("worker: task finished");
             th_cfg
                 .sender
-                .send(Msg::TaskFinished)
+                .send(Msg::TaskFinished { prediction_mode })
                 .expect("Worker: failed to send msg.");
-            println!("worker: task finished");
         } else if let Msg::Exit = msg {
             break;
         } else {

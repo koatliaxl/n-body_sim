@@ -21,7 +21,7 @@ pub use update::*;
 
 pub enum Msg {
     NewTask { delta_t: f64, prediction_mode: bool },
-    TaskFinished,
+    TaskFinished { prediction_mode: bool },
     Exit,
 }
 
@@ -80,14 +80,14 @@ fn main() {
             state.last_upd_time = Instant::now();
             update_processed = false
         }
-        if state.received < state.workers.len() {
+        if state.task_done_count < state.workers.len() {
             check_if_tasks_finished(&mut state);
         } else {
             update_world(&mut world);
             apply_collisions(&mut world);
             apply_commands(&mut world, &mut state);
             update_processed = true;
-            state.received = 0;
+            state.task_done_count = 0;
             state.update_ui_requested = true;
         }
         glfw.poll_events();
