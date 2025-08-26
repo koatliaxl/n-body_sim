@@ -61,7 +61,7 @@ fn main() {
             if state.selected >= 0 {
                 predict(&world, &mut state, &cfg, tic_duration / 1000.0);
             }
-            draw(&gl_data, &world, &state, window.get_size());
+            draw(&gl_data, &world, &state, window.get_size(), &cfg);
             gui.draw(&gl_data);
             window.swap_buffers();
             last_frame_time = Instant::now();

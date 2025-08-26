@@ -118,9 +118,9 @@ impl State {
             prediction: Prediction {
                 trajectory: Vec::new(),
                 state: prediction_holder,
-                task_done_count: 0
+                task_done_count: 0,
             },
-            update_processed: true
+            update_processed: true,
         }
     }
 }
@@ -132,7 +132,7 @@ pub struct Config {
 impl Config {
     pub fn new() -> Config {
         Config {
-            prediction_steps: 10,
+            prediction_steps: 100,
         }
     }
 }

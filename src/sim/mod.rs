@@ -33,7 +33,6 @@ pub struct ObjBuffer {
 
 pub fn begin_next_step(world: &World, delta_t: f64, state: &State, prediction_mode: bool) {
     let bodies = world.bodies.lock().expect("Main: failed to acquire lock");
-    //println!("lock acquired");
     let tasks = split_task_length(bodies.len(), state.workers.len());
     let mut offset = 0;
     for i in 0..tasks.len() {
@@ -44,7 +43,6 @@ pub fn begin_next_step(world: &World, delta_t: f64, state: &State, prediction_mo
         guard.begin = offset;
         offset += tasks[i];
     }
-    //println!("task assigned");
     for sender in &state.to_workers {
         sender
             .send(Msg::NewTask {
@@ -53,7 +51,6 @@ pub fn begin_next_step(world: &World, delta_t: f64, state: &State, prediction_mo
             })
             .expect("Main: failed to send msg.");
     }
-    //println!("msg sent");
 }
 
 pub fn check_if_tasks_finished(state: &mut State) {
@@ -67,19 +64,6 @@ pub fn check_if_tasks_finished(state: &mut State) {
             } => state.prediction.task_done_count += 1,
             _ => panic!("Main: received wrong message"),
         }
-        /*if let Msg::TaskFinished {
-            prediction_mode: false,
-        } = msg
-        {
-            state.task_done_count += 1;
-        } else if let Msg::TaskFinished {
-            prediction_mode: true,
-        } = msg
-        {
-            state.prediction.task_done_count += 1;
-        } else {
-            panic!("Main: received wrong message")
-        }*/
     }
 }
 
@@ -104,12 +88,10 @@ pub fn update_world(world: &World) {
 }
 
 pub fn apply_collisions(world: &World) {
-    //println!("apply_collisions: before lock");
     let mut bodies = world
         .bodies
         .lock()
         .expect("Main: lock not acquired on bodies");
-    //println!("apply_collisions: lock acquired");
     for mir in &world.obj_mirror {
         let mut guard = mir.lock().expect("Main: lock not acquired on obj. buffer");
         for (id, Collision { mass, vel }) in guard.collisions.iter_mut() {
@@ -126,7 +108,6 @@ pub fn apply_collisions(world: &World) {
             }
         }
     }
-    //println!("apply_collisions: done");
     bodies.retain(|body| body.class != Removed)
 }
 

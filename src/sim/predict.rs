@@ -12,8 +12,10 @@ pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
                 state: predicted,
                 ..
             },
+        selected,
         ..
     } = state;
+    //let selected_body;
     {
         let lock = world.bodies.lock();
         let bodies = lock.expect("lock must be acquired on original bodies");
@@ -22,58 +24,53 @@ pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
             .lock()
             .expect("lock must be acquired on bodies copy");
         pred_state.clear();
+        trajectory.clear();
         for body in bodies.iter() {
             pred_state.push(body.clone());
+            if body.get_id() == *selected as u64 {
+                //selected_body = body.clone();
+                trajectory.push(body.pos);
+            }
         }
-        trajectory.clear();
     }
-
     if !state.update_processed {
-        //println!("enter prediction pre-check");
         while state.task_done_count < state.workers.len() {
             check_if_tasks_finished(state);
         }
-        //println!("exited prediction pre-check");
     }
-    //let mut step_done = false;
-    'outer: for _ in 0..cfg.prediction_steps {
-        //println!("inside prediction loop");
+    let mut early_exit = false;
+    for _ in 0..cfg.prediction_steps {
         begin_next_step(&state.prediction.state, delta, state, true);
-        //let mut last = 0;
         while state.prediction.task_done_count < state.workers.len() {
             check_if_tasks_finished(state);
-            /*if state.task_done_count > last {
-                last += 1;
-                println!("task finished received {}", state.task_done_count);
-            }*/
         }
         state.prediction.task_done_count = 0;
-
         let State {
             ref selected,
-            prediction,
+            prediction:
+                Prediction {
+                    trajectory,
+                    state: ref predicted,
+                    ..
+                },
             ..
         } = state;
-        let Prediction {
+        /*let Prediction {
             trajectory,
             state: ref predicted,
             ..
-        } = prediction;
-
-        //println!("before update");
+        } = prediction;*/
         update_world(predicted);
-
-        //println!("update and apply collisions done");
         {
             let pred_state = predicted
                 .bodies
                 .lock()
                 .expect("lock must be acquired on bodies copy");
-            //println!("lock acquired");
             'inner: for body in pred_state.iter() {
                 if body.get_id() == *selected as u64 {
                     if body.class == Removed {
                         //apply_collisions(predicted);
+                        early_exit = true;
                         break 'inner;
                     }
                     /*if i>0 {
@@ -85,13 +82,13 @@ pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
                         let diff = body.pos - last_pos;
                     }*/
                     trajectory.push(body.pos);
-                    //println!("trajectory len: {}", trajectory.len());
                     break 'inner;
                 }
             }
         }
         apply_collisions(predicted);
-        //println!("applied collisions");
+        if early_exit {
+            return;
+        }
     }
-    //println!("exited from prediction loop")
 }

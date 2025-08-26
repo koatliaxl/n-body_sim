@@ -4,6 +4,8 @@ use crate::GlData;
 use n_body_sim::SIZE_OF_GL_FLOAT;
 use std::ffi::c_void;
 
+pub const TRAJECTORY_DRAW_BUFFER_SIZE: usize = 10 + 2;
+
 pub fn init_draw(gl_data: &mut GlData) {
     unsafe {
         init_obj(gl_data);
@@ -95,7 +97,7 @@ pub unsafe fn init_pos_dynamic_draw(gl_data: &mut GlData) {
     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);
     gl::BufferData(
         gl::ARRAY_BUFFER,
-        10 * SIZE_OF_GL_FLOAT,
+        TRAJECTORY_DRAW_BUFFER_SIZE as isize * SIZE_OF_GL_FLOAT,
         0 as *const c_void,
         gl::DYNAMIC_DRAW,
     );
