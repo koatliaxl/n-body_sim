@@ -46,7 +46,7 @@ fn main() {
     window_size_changed(&gl_data, window.get_size());
 
     let mut tic_duration = 0.0;
-    let mut update_processed = true;
+    //let mut update_processed = true;
     let mut last_frame_time = Instant::now();
     let mut between_frames = 0.0;
     while !window.should_close() {
@@ -58,10 +58,10 @@ fn main() {
         if since_last_frame.as_secs_f64() * 1000.0 >= between_frames && state.run_state != Stop
         /*|| state.redraw_requested*/
         {
-            draw(&gl_data, &world, &state, window.get_size());
             if state.selected >= 0 {
                 predict(&world, &mut state, &cfg, tic_duration / 1000.0);
             }
+            draw(&gl_data, &world, &state, window.get_size());
             gui.draw(&gl_data);
             window.swap_buffers();
             last_frame_time = Instant::now();
@@ -74,11 +74,11 @@ fn main() {
         let since_last_upd = state.last_upd_time.elapsed();
         if since_last_upd.as_secs_f64() * 1000.0 >= tic_duration
             && state.run_state == Run
-            && update_processed
+            && state.update_processed
         {
             begin_next_step(&mut world, tic_duration / 1000.0, &mut state, false);
             state.last_upd_time = Instant::now();
-            update_processed = false
+            state.update_processed = false
         }
         if state.task_done_count < state.workers.len() {
             check_if_tasks_finished(&mut state);
@@ -86,7 +86,7 @@ fn main() {
             update_world(&mut world);
             apply_collisions(&mut world);
             apply_commands(&mut world, &mut state);
-            update_processed = true;
+            state.update_processed = true;
             state.task_done_count = 0;
             state.update_ui_requested = true;
         }

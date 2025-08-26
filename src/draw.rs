@@ -1,5 +1,5 @@
 use crate::{GlData, State, World};
-use mat_vec::{Matrix4x4, Vector3, Vector4};
+use mat_vec::{Matrix4x4, Vector3/*, Vector4*/};
 use n_body_sim::gl;
 
 pub use text::*;
@@ -41,8 +41,8 @@ unsafe fn draw_bodies(gl_res: &GlData, world: &World, state: &State) {
         let scaling = Matrix4x4::new_uniform_scaling(obj.get_radius() as f32);
         let model_mat = model_mat * scaling;
         gl_res.set_uniform_mat4x4("model_mat", "Body shader", &model_mat);
-        let color = Vector4::new(1.0, 0.1, 0.5, 1.0);
-        gl_res.set_uniform_vec4f("color", "Body shader", color);
+        let color = Vector3::new(1.0, 0.1, 0.5);
+        gl_res.set_uniform_vec3f("color", "Body shader", color);
         //gl::DrawArrays(gl::POINTS, 0, 16);
         if obj.get_id() == state.selected as u64 {
             gl::DrawArrays(gl::LINES, 0, 16);
@@ -58,10 +58,10 @@ unsafe fn draw_trajectory(gl_res: &GlData, _world: &World, state: &State) {
     let vertex_arr = gl_res.get_vertex_array_gl_id("dynamic_only_position");
     gl::BindVertexArray(vertex_arr);
 
-    gl_res.set_uniform_vec4f(
+    gl_res.set_uniform_vec3f(
         "color",
         "Trajectory shader",
-        Vector4::new(0.0, 0.3, 1.0, 0.7),
+        Vector3::new(0.0, 0.3, 1.0),
     );
 
     let vertex_buf = gl_res.get_vertex_buffer_gl_id("dynamic-10");
@@ -86,7 +86,7 @@ unsafe fn draw_trajectory(gl_res: &GlData, _world: &World, state: &State) {
             );
             gl::DrawArrays(gl::LINE_STRIP, 0, 5)
         }
-        println!("inside traj. draw loop ({}, {})", s, i)
+        //println!("inside traj. draw loop ({}, {})", s, i)
     }
     gl::BindBuffer(gl::ARRAY_BUFFER, 0);
     //println!("exited from traj. draw loop")

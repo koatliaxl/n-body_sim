@@ -35,31 +35,31 @@ pub fn compute_in_parallel(
 
             collisions.clear();
             if !prediction_mode {
-                println!("worker: before lock (not prediction)");
+                //println!("worker: before lock (not prediction)");
                 let bodies = bodies
                     .lock()
                     .expect("Worker: lock not acquired for parallel read");
 
-                println!("worker: lock acquired (not prediction)");
+                //println!("worker: lock acquired (not prediction)");
                 prepare_changes(&bodies, changes, task, begin);
                 compute_forces(&bodies, changes, forces, collisions);
                 check_suspicion_hitboxes(&bodies, changes, delta_t);
                 move_bodies(changes, forces, delta_t);
                 check_for_collisions(&bodies, changes, collisions);
             } else {
-                println!("worker: before lock");
+                //println!("worker: before lock");
                 let pred_state = prediction_state
                     .lock()
                     .expect("Worker: lock must be acquired on prediction state");
 
-                println!("worker: lock acquired");
+                //println!("worker: lock acquired");
                 prepare_changes(&pred_state, changes, task, begin);
                 compute_forces(&pred_state, changes, forces, collisions);
                 check_suspicion_hitboxes(&pred_state, changes, delta_t);
                 move_bodies(changes, forces, delta_t);
                 check_for_collisions(&pred_state, changes, collisions);
             }
-            println!("worker: task finished");
+            //println!("worker: task finished");
             th_cfg
                 .sender
                 .send(Msg::TaskFinished { prediction_mode })

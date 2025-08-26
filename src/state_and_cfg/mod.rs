@@ -35,6 +35,7 @@ pub struct State {
     pub to_workers: Vec<Sender<Msg>>,
     pub from_workers: Receiver<Msg>,
     pub task_done_count: usize,
+    pub update_processed: bool,
     pub workers: Vec<JoinHandle<()>>,
     pub selected: i64,
     pub new_obj_mass: f64,
@@ -119,6 +120,7 @@ impl State {
                 state: prediction_holder,
                 task_done_count: 0
             },
+            update_processed: true
         }
     }
 }
