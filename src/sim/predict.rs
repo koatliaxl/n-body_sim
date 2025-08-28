@@ -33,17 +33,20 @@ pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
             }
         }
     }
-    if !state.update_processed {
+    /*if !state.update_processed {
         while state.task_done_count < state.workers.len() {
             check_if_tasks_finished(state);
         }
-    }
+    }*/
     let mut early_exit = false;
     for _ in 0..cfg.prediction_steps {
+        //println!("inside pred. loop");
         begin_next_step(&state.prediction.state, delta, state, true);
+        //println!("given tasks");
         while state.prediction.task_done_count < state.workers.len() {
-            check_if_tasks_finished(state);
+            check_if_tasks_finished(state, true);
         }
+        //println!("tasks finished");
         state.prediction.task_done_count = 0;
         let State {
             ref selected,
@@ -55,12 +58,8 @@ pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
                 },
             ..
         } = state;
-        /*let Prediction {
-            trajectory,
-            state: ref predicted,
-            ..
-        } = prediction;*/
         update_world(predicted);
+        //println!("after update");
         {
             let pred_state = predicted
                 .bodies

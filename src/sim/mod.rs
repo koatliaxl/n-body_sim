@@ -28,7 +28,7 @@ pub struct ObjBuffer {
     pub task: usize,
     pub begin: usize,
     pub collisions: HashMap<u64, Collision>,
-    pub prediction_state: Arc<Mutex<Vec<Body>>>,
+    //pub prediction_state: Arc<Mutex<Vec<Body>>>,
 }
 
 pub fn begin_next_step(world: &World, delta_t: f64, state: &State, prediction_mode: bool) {
@@ -43,26 +43,40 @@ pub fn begin_next_step(world: &World, delta_t: f64, state: &State, prediction_mo
         guard.begin = offset;
         offset += tasks[i];
     }
-    for sender in &state.to_workers {
+    let to_workers = if !prediction_mode {
+        &state.to_workers
+    } else {
+        &state.prediction.to_workers
+    };
+    for sender in to_workers {
         sender
             .send(Msg::NewTask {
                 delta_t,
-                prediction_mode,
+                //prediction_mode,
             })
             .expect("Main: failed to send msg.");
     }
 }
 
-pub fn check_if_tasks_finished(state: &mut State) {
-    if let Ok(msg) = state.from_workers.try_recv() {
-        match msg {
-            Msg::TaskFinished {
-                prediction_mode: false,
-            } => state.task_done_count += 1,
-            Msg::TaskFinished {
-                prediction_mode: true,
-            } => state.prediction.task_done_count += 1,
-            _ => panic!("Main: received wrong message"),
+pub fn check_if_tasks_finished(state: &mut State, prediction: bool) {
+    if !prediction {
+        if let Ok(msg) = state.from_workers.try_recv() {
+            match msg {
+                Msg::TaskFinished {
+                    //prediction_mode: false,
+                } => state.task_done_count += 1,
+                /*Msg::TaskFinished {
+                    prediction_mode: true,
+                } => state.prediction.task_done_count += 1,*/
+                _ => panic!("Main: received wrong message"),
+            }
+        }
+    } else {
+        if let Ok(msg) = state.prediction.from_workers.try_recv() {
+            match msg {
+                Msg::TaskFinished {} => state.prediction.task_done_count += 1,
+                _ => panic!("Main: received wrong message"),
+            }
         }
     }
 }

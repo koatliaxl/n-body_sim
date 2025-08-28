@@ -23,7 +23,7 @@ pub fn init_world(number_threads: usize) -> (World, World) {
     let prediction_state = Arc::new(Mutex::new(Vec::new()));
     let mut obj_bufs = Vec::new();
     let mut pred_bufs = Vec::new();
-    for i in 0..number_threads {
+    for _ in 0..number_threads {
         obj_bufs.push(Arc::new(Mutex::new(ObjBuffer {
             par_read: Arc::clone(&objects),
             changes: Vec::new(),
@@ -31,9 +31,17 @@ pub fn init_world(number_threads: usize) -> (World, World) {
             task: 0,
             begin: 0,
             collisions: HashMap::new(),
-            prediction_state: Arc::clone(&prediction_state),
+            //prediction_state: Arc::clone(&prediction_state),
         })));
-        pred_bufs.push(Arc::clone(&obj_bufs[i]))
+        //pred_bufs.push(Arc::clone(&obj_bufs[i]))
+        pred_bufs.push(Arc::new(Mutex::new(ObjBuffer {
+            par_read: Arc::clone(&prediction_state),
+            changes: Vec::new(),
+            forces: Vec::new(),
+            task: 0,
+            begin: 0,
+            collisions: HashMap::new(),
+        })))
     }
     (
         World {

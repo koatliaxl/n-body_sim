@@ -31,6 +31,9 @@ pub fn handle_events(
         for snd in &state.to_workers {
             snd.send(Msg::Exit).expect("main: failed to send msg.");
         }
+        for snd in &state.prediction.to_workers {
+            snd.send(Msg::Exit).expect("main: failed to send msg.");
+        }
     }
 
     for (_, event) in glfw::flush_messages(&events) {

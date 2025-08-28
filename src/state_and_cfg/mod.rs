@@ -49,6 +49,9 @@ pub struct Prediction {
     pub trajectory: Vec<Vector3<f64>>,
     pub state: World,
     pub task_done_count: usize,
+    pub workers: Vec<JoinHandle<()>>,
+    pub to_workers: Vec<Sender<Msg>>,
+    pub from_workers: Receiver<Msg>,
 }
 
 pub enum Command {
@@ -92,6 +95,24 @@ impl State {
             jh_vec.push(jh)
         }
         //state.from_workers = from_workers;
+
+        let mut to_pred_workers = Vec::new();
+        let mut jh_pred = Vec::new();
+        let (to_main_from_pw, from_pred_w) = mpsc::channel();
+        let last_id = data_mirrors.len();
+        for i in last_id..last_id + prediction_holder.obj_mirror.len() {
+            let (to_pred_w, from_main) = mpsc::channel();
+            let mirror = Arc::clone(&prediction_holder.obj_mirror[i - last_id]);
+            let th_cfg = ThreadConfig {
+                receiver: from_main,
+                sender: to_main_from_pw.clone(),
+                id: i,
+            };
+            let jh = thread::spawn(move || compute_in_parallel(th_cfg, mirror));
+            to_pred_workers.push(to_pred_w);
+            jh_pred.push(jh);
+        }
+
         State {
             start_time: Instant::now(),
             last_upd_time: Instant::now(),
@@ -119,6 +140,9 @@ impl State {
                 trajectory: Vec::new(),
                 state: prediction_holder,
                 task_done_count: 0,
+                workers: jh_pred,
+                to_workers: to_pred_workers,
+                from_workers: from_pred_w,
             },
             update_processed: true,
         }

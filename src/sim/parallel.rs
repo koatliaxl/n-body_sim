@@ -15,7 +15,7 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
             .expect("Worker: channel disconnected");
         if let Msg::NewTask {
             delta_t,
-            prediction_mode,
+            //prediction_mode,
         } = msg
         {
             let lock = mirror.lock();
@@ -27,11 +27,22 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
                 task,
                 begin,
                 ref mut collisions,
-                ref prediction_state,
+                //ref prediction_state,
             } = *guard;
 
             collisions.clear();
-            if !prediction_mode {
+            //println!("worker: before lock");
+            let bodies = bodies
+                .lock()
+                .expect("Worker: lock not acquired for parallel read");
+            //println!("worker: after lock");
+
+            prepare_changes(&bodies, changes, task, begin);
+            compute_forces(&bodies, changes, forces, collisions);
+            check_suspicion_hitboxes(&bodies, changes, delta_t);
+            move_bodies(changes, forces, delta_t);
+            check_for_collisions(&bodies, changes, collisions);
+            /*if !prediction_mode {
                 let bodies = bodies
                     .lock()
                     .expect("Worker: lock not acquired for parallel read");
@@ -51,10 +62,10 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
                 check_suspicion_hitboxes(&pred_state, changes, delta_t);
                 move_bodies(changes, forces, delta_t);
                 check_for_collisions(&pred_state, changes, collisions);
-            }
+            }*/
             th_cfg
                 .sender
-                .send(Msg::TaskFinished { prediction_mode })
+                .send(Msg::TaskFinished { /*prediction_mode*/ })
                 .expect("Worker: failed to send msg.");
         } else if let Msg::Exit = msg {
             break;

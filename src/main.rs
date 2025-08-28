@@ -20,8 +20,10 @@ pub mod update;
 pub use update::*;
 
 pub enum Msg {
-    NewTask { delta_t: f64, prediction_mode: bool },
-    TaskFinished { prediction_mode: bool },
+    NewTask {
+        delta_t: f64, /*, prediction_mode: bool*/
+    },
+    TaskFinished {/*prediction_mode: bool*/},
     Exit,
 }
 
@@ -81,7 +83,7 @@ fn main() {
             state.update_processed = false
         }
         if state.task_done_count < state.workers.len() {
-            check_if_tasks_finished(&mut state);
+            check_if_tasks_finished(&mut state, false);
         } else {
             update_world(&mut world);
             apply_collisions(&mut world);
@@ -98,6 +100,9 @@ fn main() {
         }
     }
     for jh in state.workers {
+        jh.join().expect("failed to join worker");
+    }
+    for jh in state.prediction.workers {
         jh.join().expect("failed to join worker");
     }
 }
