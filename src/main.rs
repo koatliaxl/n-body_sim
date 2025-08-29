@@ -20,10 +20,8 @@ pub mod update;
 pub use update::*;
 
 pub enum Msg {
-    NewTask {
-        delta_t: f64, /*, prediction_mode: bool*/
-    },
-    TaskFinished {/*prediction_mode: bool*/},
+    NewTask { delta_t: f64 },
+    TaskFinished {},
     Exit,
 }
 
@@ -91,6 +89,14 @@ fn main() {
             state.update_processed = true;
             state.task_done_count = 0;
             state.update_ui_requested = true;
+            state.prediction.history.pop_front();
+            state.prediction.trajectory.pop_front();
+            if state.prediction.selected_ceased_to_exist_on > 0 {
+                state.prediction.selected_ceased_to_exist_on -= 1;
+            } else if state.prediction.history.is_empty() {
+                state.prediction.selected_ceased_to_exist_on = -1;
+                state.selected = -1;
+            }
         }
         glfw.poll_events();
         handle_events(&mut window, &events, &mut state, &gl_data, &world, &mut gui);

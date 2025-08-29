@@ -59,6 +59,8 @@ pub fn handle_events(
                 }
                 if button == RightButton && action == Press {
                     state.selected = -1;
+                    state.prediction.history.clear();
+                    state.prediction.selected_ceased_to_exist_on = -1;
                 }
             }
             CursorPos(x, y) => {

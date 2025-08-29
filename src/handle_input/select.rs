@@ -27,7 +27,9 @@ pub fn select_obj(
         let radius = BODY_GFX_SCALE * body.get_radius() as f32;
         if equation_val < (radius / state.view_scale * (w + h) / 2.0).powi(2) {
             state.selected = body.get_id() as i64;
-            state.update_ui_requested = true
+            state.update_ui_requested = true;
+            state.prediction.history.clear();
+            state.prediction.selected_ceased_to_exist_on = -1;
         }
     }
 }

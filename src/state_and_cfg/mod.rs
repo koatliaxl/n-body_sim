@@ -1,7 +1,7 @@
 use crate::sim::World;
 use crate::{compute_in_parallel, Msg, ObjBuffer};
 use mat_vec::Vector3;
-use n_body_sim::BodyType;
+use n_body_sim::{Body, BodyType};
 use std::collections::VecDeque;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc, Mutex};
@@ -46,12 +46,15 @@ pub struct State {
 }
 
 pub struct Prediction {
-    pub trajectory: Vec<Vector3<f64>>,
+    pub trajectory: VecDeque<Vector3<f64>>,
     pub state: World,
+    pub history: VecDeque<Vec<Body>>,
+    pub selected_ceased_to_exist_on: isize,
     pub task_done_count: usize,
     pub workers: Vec<JoinHandle<()>>,
     pub to_workers: Vec<Sender<Msg>>,
     pub from_workers: Receiver<Msg>,
+    pub devalidated: bool,
 }
 
 pub enum Command {
@@ -137,12 +140,15 @@ impl State {
             //redraw_requested: false,
             update_ui_requested: false,
             prediction: Prediction {
-                trajectory: Vec::new(),
+                trajectory: VecDeque::new(),
                 state: prediction_holder,
+                history: VecDeque::new(),
+                selected_ceased_to_exist_on: -1,
                 task_done_count: 0,
                 workers: jh_pred,
                 to_workers: to_pred_workers,
                 from_workers: from_pred_w,
+                devalidated: false,
             },
             update_processed: true,
         }
@@ -150,7 +156,7 @@ impl State {
 }
 
 pub struct Config {
-    pub prediction_steps: u32,
+    pub prediction_steps: usize,
 }
 
 impl Config {

@@ -13,11 +13,7 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
             .receiver
             .recv()
             .expect("Worker: channel disconnected");
-        if let Msg::NewTask {
-            delta_t,
-            //prediction_mode,
-        } = msg
-        {
+        if let Msg::NewTask { delta_t } = msg {
             let lock = mirror.lock();
             let mut guard = lock.expect("Worker: lock not acquired");
             let ObjBuffer {
@@ -27,46 +23,23 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
                 task,
                 begin,
                 ref mut collisions,
-                //ref prediction_state,
             } = *guard;
 
             collisions.clear();
-            //println!("worker: before lock");
             let bodies = bodies
                 .lock()
                 .expect("Worker: lock not acquired for parallel read");
-            //println!("worker: after lock");
 
             prepare_changes(&bodies, changes, task, begin);
             compute_forces(&bodies, changes, forces, collisions);
             check_suspicion_hitboxes(&bodies, changes, delta_t);
             move_bodies(changes, forces, delta_t);
             check_for_collisions(&bodies, changes, collisions);
-            /*if !prediction_mode {
-                let bodies = bodies
-                    .lock()
-                    .expect("Worker: lock not acquired for parallel read");
-
-                prepare_changes(&bodies, changes, task, begin);
-                compute_forces(&bodies, changes, forces, collisions);
-                check_suspicion_hitboxes(&bodies, changes, delta_t);
-                move_bodies(changes, forces, delta_t);
-                check_for_collisions(&bodies, changes, collisions);
-            } else {
-                let pred_state = prediction_state
-                    .lock()
-                    .expect("Worker: lock must be acquired on prediction state");
-
-                prepare_changes(&pred_state, changes, task, begin);
-                compute_forces(&pred_state, changes, forces, collisions);
-                check_suspicion_hitboxes(&pred_state, changes, delta_t);
-                move_bodies(changes, forces, delta_t);
-                check_for_collisions(&pred_state, changes, collisions);
-            }*/
             th_cfg
                 .sender
-                .send(Msg::TaskFinished { /*prediction_mode*/ })
+                .send(Msg::TaskFinished {})
                 .expect("Worker: failed to send msg.");
+            //println!("worker: task finished");
         } else if let Msg::Exit = msg {
             break;
         } else {

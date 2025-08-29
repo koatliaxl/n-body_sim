@@ -5,18 +5,21 @@ use crate::{
 use n_body_sim::BodyType::Removed;
 
 pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
-    let State {
-        prediction:
-            Prediction {
-                trajectory,
-                state: predicted,
-                ..
-            },
-        selected,
-        ..
-    } = state;
     //let selected_body;
-    {
+    if state.prediction.selected_ceased_to_exist_on >= 0 {
+        return;
+    }
+    if state.prediction.history.is_empty() {
+        let State {
+            prediction:
+                Prediction {
+                    trajectory,
+                    state: predicted,
+                    ..
+                },
+            selected,
+            ..
+        } = state;
         let lock = world.bodies.lock();
         let bodies = lock.expect("lock must be acquired on original bodies");
         let mut pred_state = predicted
@@ -29,63 +32,57 @@ pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
             pred_state.push(body.clone());
             if body.get_id() == *selected as u64 {
                 //selected_body = body.clone();
-                trajectory.push(body.pos);
+                trajectory.push_back(body.pos);
             }
         }
     }
-    /*if !state.update_processed {
-        while state.task_done_count < state.workers.len() {
-            check_if_tasks_finished(state);
-        }
-    }*/
     let mut early_exit = false;
-    for _ in 0..cfg.prediction_steps {
-        //println!("inside pred. loop");
+    for i in state.prediction.history.len()..cfg.prediction_steps {
+        //println!("entered pred. loop");
         begin_next_step(&state.prediction.state, delta, state, true);
-        //println!("given tasks");
         while state.prediction.task_done_count < state.workers.len() {
             check_if_tasks_finished(state, true);
         }
         //println!("tasks finished");
         state.prediction.task_done_count = 0;
+        {}
         let State {
             ref selected,
             prediction:
                 Prediction {
                     trajectory,
                     state: ref predicted,
+                    history,
                     ..
                 },
             ..
         } = state;
+        //println!("before update");
         update_world(predicted);
         //println!("after update");
+        let mut bodies = Vec::new();
         {
             let pred_state = predicted
                 .bodies
                 .lock()
                 .expect("lock must be acquired on bodies copy");
             'inner: for body in pred_state.iter() {
+                bodies.push(body.clone());
                 if body.get_id() == *selected as u64 {
+                    trajectory.push_back(body.pos);
                     if body.class == Removed {
-                        //apply_collisions(predicted);
+                        state.prediction.selected_ceased_to_exist_on = i as isize;
                         early_exit = true;
-                        break 'inner;
+                        //break 'inner;
                     }
-                    /*if i>0 {
-                        let last_pos = if let Some(v) = state.prediction.trajectory.last() {
-                            *v
-                        } else {
-                            panic!("There is must be last position if prediction step > 1")
-                        };
-                        let diff = body.pos - last_pos;
-                    }*/
-                    trajectory.push(body.pos);
-                    break 'inner;
+                    //break 'inner;
                 }
             }
         }
+        //println!("before applying collisions");
         apply_collisions(predicted);
+        //println!("after applying collisions");
+        history.push_back(bodies);
         if early_exit {
             return;
         }

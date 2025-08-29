@@ -50,10 +50,7 @@ pub fn begin_next_step(world: &World, delta_t: f64, state: &State, prediction_mo
     };
     for sender in to_workers {
         sender
-            .send(Msg::NewTask {
-                delta_t,
-                //prediction_mode,
-            })
+            .send(Msg::NewTask { delta_t })
             .expect("Main: failed to send msg.");
     }
 }
@@ -62,12 +59,7 @@ pub fn check_if_tasks_finished(state: &mut State, prediction: bool) {
     if !prediction {
         if let Ok(msg) = state.from_workers.try_recv() {
             match msg {
-                Msg::TaskFinished {
-                    //prediction_mode: false,
-                } => state.task_done_count += 1,
-                /*Msg::TaskFinished {
-                    prediction_mode: true,
-                } => state.prediction.task_done_count += 1,*/
+                Msg::TaskFinished {} => state.task_done_count += 1,
                 _ => panic!("Main: received wrong message"),
             }
         }
@@ -106,6 +98,7 @@ pub fn apply_collisions(world: &World) {
         .bodies
         .lock()
         .expect("Main: lock not acquired on bodies");
+    //println!("after bodies lock");
     for mir in &world.obj_mirror {
         let mut guard = mir.lock().expect("Main: lock not acquired on obj. buffer");
         for (id, Collision { mass, vel }) in guard.collisions.iter_mut() {
@@ -126,6 +119,13 @@ pub fn apply_collisions(world: &World) {
 }
 
 pub fn apply_commands(world: &mut World, state: &mut State) {
+    if state.command_queue.is_empty() {
+        return;
+    } else {
+        //state.prediction.devalidated = true;
+        state.prediction.history.clear();
+        state.prediction.selected_ceased_to_exist_on = -1;
+    }
     let mut bodies = world
         .bodies
         .lock()
