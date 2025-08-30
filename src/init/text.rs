@@ -1,5 +1,6 @@
-use crate::{gl, GlData, Glyph};
+use crate::{gl, GlData};
 use mat_vec::Vector3;
+use n_body_sim::Glyph;
 use std::ffi::c_void;
 
 pub fn init_glyphs(gl_data: &mut GlData) {

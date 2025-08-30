@@ -3,6 +3,7 @@ use draw::draw;
 use glfw::Context;
 use handle_input::*;
 use init::*;
+use n_body_sim::GlData;
 use n_body_sim::{gl, Body};
 use sim::*;
 use state_and_cfg::RunState::*;
@@ -14,6 +15,9 @@ mod handle_input;
 mod init;
 mod sim;
 mod state_and_cfg;
+pub mod update;
+
+pub use update::*;
 
 pub enum Msg {
     NewTask { delta_t: f64 },
@@ -34,9 +38,11 @@ fn main() {
     init_draw(&mut gl_data);
     init_glyphs(&mut gl_data);
     let mut state = State::new(&world.obj_mirror);
+    let mut gui = init_gui();
 
     view_pos_changed(&gl_data, &mut state, window.get_size());
     view_scale_changed(&gl_data, &state, window.get_size());
+    window_size_changed(&gl_data, window.get_size());
 
     let mut tic_duration = 0.0;
     let mut update_processed = true;
@@ -48,10 +54,14 @@ fn main() {
             state.fps_changed = false;
         }
         let since_last_frame = last_frame_time.elapsed();
-        if since_last_frame.as_secs_f64() * 1000.0 >= between_frames || state.run_state != Stop {
+        if since_last_frame.as_secs_f64() * 1000.0 >= between_frames && state.run_state != Stop
+        /*|| state.redraw_requested*/
+        {
             draw(&gl_data, &world, &state, window.get_size());
+            gui.draw(&gl_data);
             window.swap_buffers();
             last_frame_time = Instant::now();
+            //state.redraw_requested = false
         }
         if state.ups_changed {
             tic_duration = 1000.0 / state.ups as f64;
@@ -73,10 +83,15 @@ fn main() {
             apply_collisions(&mut world);
             apply_commands(&mut world, &mut state);
             update_processed = true;
-            state.received = 0
+            state.received = 0;
+            state.update_ui_requested = true;
         }
         glfw.poll_events();
-        handle_events(&mut window, &events, &mut state, &gl_data, &world);
+        handle_events(&mut window, &events, &mut state, &gl_data, &world, &mut gui);
+        if state.update_ui_requested {
+            update_gui(&mut state, &world, window.get_size(), &mut gui);
+            state.update_ui_requested = false
+        }
     }
     for jh in state.workers {
         jh.join().expect("failed to join worker");

@@ -17,13 +17,11 @@ pub fn draw(gl_res: &GlData, world: &World, state: &State, _window_size: (i32, i
         //gl::LineWidth(2.0);
 
         draw_bodies(gl_res, world, state);
-        /*draw_text(gl_res, "abc 123 DEF", (-150, 110), 1.0);
-        draw_text(gl_res, "OpenGL", (-50, -130), 1.5);*/
     }
 }
 
 unsafe fn draw_bodies(gl_res: &GlData, world: &World, state: &State) {
-    let shader = gl_res.get_shader_gl_id("Object shader");
+    let shader = gl_res.get_shader_gl_id("Body shader");
     gl::UseProgram(shader);
     let vertex_buf = gl_res.get_vertex_buffer_gl_id("Circle");
     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);
@@ -41,7 +39,7 @@ unsafe fn draw_bodies(gl_res: &GlData, world: &World, state: &State) {
         let model_mat = Matrix4x4::new_translation_from_vec(pos);
         let scaling = Matrix4x4::new_uniform_scaling(obj.get_radius() as f32);
         let model_mat = model_mat * scaling;
-        gl_res.set_uniform_mat4x4("model_mat", "Object shader", &model_mat);
+        gl_res.set_uniform_mat4x4("model_mat", "Body shader", &model_mat);
         //gl::DrawArrays(gl::POINTS, 0, 16);
         if obj.get_id() == state.selected as u64 {
             gl::DrawArrays(gl::LINES, 0, 16);

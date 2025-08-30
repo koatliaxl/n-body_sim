@@ -1,8 +1,18 @@
+//use super::select::*;
+//use crate::sim::World;
+//use crate::update_gui;
 use crate::{GlData, State};
 use mat_vec::{Matrix4x4, Vector3};
 use n_body_sim::gl;
+//use n_body_sim::gui::RootGIE;
 
-pub fn view_pos_changed(gl_res: &GlData, state: &mut State, window_size: (i32, i32)) {
+pub fn view_pos_changed(
+    gl_res: &GlData,
+    state: &mut State,
+    window_size: (i32, i32),
+    //world: &World,
+    //gui: &mut RootGIE,
+) {
     //let last_vec = Vector3::from_tuple(state.last_cursor_pos); //todo: Vector3 from tuple-2 ("as Vector2")
     let (x, y) = state.last_cursor_pos;
     let last_vec = Vector3::new(x, y, 0.0);
@@ -19,17 +29,19 @@ pub fn view_pos_changed(gl_res: &GlData, state: &mut State, window_size: (i32, i
         Vector3::new(0.0, 1.0, 0.0),
     );
     unsafe {
-        let body_shader = gl_res.get_shader_gl_id("Object shader");
+        let body_shader = gl_res.get_shader_gl_id("Body shader");
         gl::UseProgram(body_shader);
-        gl_res.set_uniform_mat4x4("view_mat", "Object shader", &view_mat);
+        gl_res.set_uniform_mat4x4("view_mat", "Body shader", &view_mat);
 
-        let text_shader = gl_res.get_shader_gl_id("Text shader");
+        /*let text_shader = gl_res.get_shader_gl_id("Text shader");
         gl::UseProgram(text_shader);
         let proj_mat = Matrix4x4::<f32>::new_orthographic_projection(
             w as f32, h as f32, 1.0, -0.1, /* fmt force new line */
         );
-        gl_res.set_uniform_mat4x4("proj_mat", "Text shader", &proj_mat);
+        gl_res.set_uniform_mat4x4("proj_mat", "Text shader", &proj_mat);*/
     }
+    state.update_ui_requested = true;
+    //update_gui(state, world, window_size, gui)
 }
 
 pub fn view_scale_changed(gl_res: &GlData, state: &State, window_size: (i32, i32)) {
@@ -42,8 +54,20 @@ pub fn view_scale_changed(gl_res: &GlData, state: &State, window_size: (i32, i32
         0.1,
     );
     unsafe {
-        let shader = gl_res.get_shader_gl_id("Object shader");
+        let shader = gl_res.get_shader_gl_id("Body shader");
         gl::UseProgram(shader);
-        gl_res.set_uniform_mat4x4("proj_mat", "Object shader", &proj_mat);
+        gl_res.set_uniform_mat4x4("proj_mat", "Body shader", &proj_mat);
+    }
+}
+
+pub fn window_size_changed(gl_res: &GlData, window_size: (i32, i32)) {
+    let text_shader = gl_res.get_shader_gl_id("Text shader");
+    let (w, h) = window_size;
+    unsafe {
+        gl::UseProgram(text_shader);
+        let proj_mat = Matrix4x4::<f32>::new_orthographic_projection(
+            w as f32, h as f32, 1.0, -0.1, /* fmt force new line */
+        );
+        gl_res.set_uniform_mat4x4("proj_mat", "Text shader", &proj_mat);
     }
 }
