@@ -76,9 +76,26 @@ fn main() {
             && state.run_state == Run
             && state.update_processed
         {
-            begin_next_step(&mut world, tic_duration / 1000.0, &mut state, false);
+            if state.prediction.history.is_empty() {
+                println!("task given (non pred.)");
+                begin_next_step(&mut world, tic_duration / 1000.0, &mut state, false);
+                state.update_processed = false
+            } else {
+                let next_step = if let Some(bodies) = state.progress_to_next_step() {
+                    bodies
+                } else {
+                    unreachable!(
+                        "because element must be always popped when deque is not empty, \
+                    and condition that history is not empty is prerequisite to that code"
+                    )
+                };
+                *world.bodies.lock().expect(
+                    "applying next step from prediction: lock on bodies must be acquired",
+                ) = next_step;
+                //state.prediction.trajectory.pop_front();
+                state.update_ui_requested = true;
+            }
             state.last_upd_time = Instant::now();
-            state.update_processed = false
         }
         if state.task_done_count < state.workers.len() {
             check_if_tasks_finished(&mut state, false);
@@ -89,14 +106,7 @@ fn main() {
             state.update_processed = true;
             state.task_done_count = 0;
             state.update_ui_requested = true;
-            state.prediction.history.pop_front();
-            state.prediction.trajectory.pop_front();
-            if state.prediction.selected_ceased_to_exist_on > 0 {
-                state.prediction.selected_ceased_to_exist_on -= 1;
-            } else if state.prediction.history.is_empty() {
-                state.prediction.selected_ceased_to_exist_on = -1;
-                state.selected = -1;
-            }
+            state.progress_to_next_step();
         }
         glfw.poll_events();
         handle_events(&mut window, &events, &mut state, &gl_data, &world, &mut gui);

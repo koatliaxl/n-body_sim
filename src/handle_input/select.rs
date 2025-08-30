@@ -28,8 +28,7 @@ pub fn select_obj(
         if equation_val < (radius / state.view_scale * (w + h) / 2.0).powi(2) {
             state.selected = body.get_id() as i64;
             state.update_ui_requested = true;
-            state.prediction.history.clear();
-            state.prediction.selected_ceased_to_exist_on = -1;
+            state.prediction.devalidate_history();
         }
     }
 }

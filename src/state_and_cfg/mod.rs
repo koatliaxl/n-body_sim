@@ -10,6 +10,8 @@ use std::thread::JoinHandle;
 use std::time::Instant;
 //static NUM_THREADS: u64 =
 
+pub mod prediction;
+
 #[derive(PartialEq)]
 pub enum RunState {
     Run,
@@ -54,7 +56,7 @@ pub struct Prediction {
     pub workers: Vec<JoinHandle<()>>,
     pub to_workers: Vec<Sender<Msg>>,
     pub from_workers: Receiver<Msg>,
-    pub devalidated: bool,
+    //pub devalidated: bool,
 }
 
 pub enum Command {
@@ -73,6 +75,7 @@ pub struct ThreadConfig {
     pub receiver: Receiver<Msg>,
     pub sender: Sender<Msg>,
     pub id: usize,
+    pub prediction: bool,
 }
 
 impl State {
@@ -90,6 +93,7 @@ impl State {
                 receiver: rcv,
                 sender: to_main.clone(),
                 id: i,
+                prediction: false,
             };
             let jh = thread::spawn(move || {
                 compute_in_parallel(th_cfg, mirror);
@@ -110,6 +114,7 @@ impl State {
                 receiver: from_main,
                 sender: to_main_from_pw.clone(),
                 id: i,
+                prediction: true,
             };
             let jh = thread::spawn(move || compute_in_parallel(th_cfg, mirror));
             to_pred_workers.push(to_pred_w);
@@ -148,7 +153,7 @@ impl State {
                 workers: jh_pred,
                 to_workers: to_pred_workers,
                 from_workers: from_pred_w,
-                devalidated: false,
+                //devalidated: false,
             },
             update_processed: true,
         }

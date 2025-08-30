@@ -33,7 +33,7 @@ pub struct ObjBuffer {
 
 pub fn begin_next_step(world: &World, delta_t: f64, state: &State, prediction_mode: bool) {
     let bodies = world.bodies.lock().expect("Main: failed to acquire lock");
-    let tasks = split_task_length(bodies.len(), state.workers.len());
+    let tasks = split_task_length(bodies.len(), state.workers.len()); //todo potential bug
     let mut offset = 0;
     for i in 0..tasks.len() {
         let mut guard = world.obj_mirror[i]
@@ -98,7 +98,6 @@ pub fn apply_collisions(world: &World) {
         .bodies
         .lock()
         .expect("Main: lock not acquired on bodies");
-    //println!("after bodies lock");
     for mir in &world.obj_mirror {
         let mut guard = mir.lock().expect("Main: lock not acquired on obj. buffer");
         for (id, Collision { mass, vel }) in guard.collisions.iter_mut() {
@@ -122,9 +121,7 @@ pub fn apply_commands(world: &mut World, state: &mut State) {
     if state.command_queue.is_empty() {
         return;
     } else {
-        //state.prediction.devalidated = true;
-        state.prediction.history.clear();
-        state.prediction.selected_ceased_to_exist_on = -1;
+        state.prediction.devalidate_history()
     }
     let mut bodies = world
         .bodies

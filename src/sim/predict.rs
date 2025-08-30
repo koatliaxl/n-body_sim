@@ -38,12 +38,10 @@ pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
     }
     let mut early_exit = false;
     for i in state.prediction.history.len()..cfg.prediction_steps {
-        //println!("entered pred. loop");
         begin_next_step(&state.prediction.state, delta, state, true);
         while state.prediction.task_done_count < state.workers.len() {
             check_if_tasks_finished(state, true);
         }
-        //println!("tasks finished");
         state.prediction.task_done_count = 0;
         {}
         let State {
@@ -57,32 +55,32 @@ pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
                 },
             ..
         } = state;
-        //println!("before update");
         update_world(predicted);
-        //println!("after update");
-        let mut bodies = Vec::new();
+        //let mut bodies = Vec::new();
         {
             let pred_state = predicted
                 .bodies
                 .lock()
                 .expect("lock must be acquired on bodies copy");
-            'inner: for body in pred_state.iter() {
-                bodies.push(body.clone());
+            for body in pred_state.iter() {
+                //bodies.push(body.clone());
                 if body.get_id() == *selected as u64 {
                     trajectory.push_back(body.pos);
                     if body.class == Removed {
                         state.prediction.selected_ceased_to_exist_on = i as isize;
                         early_exit = true;
-                        //break 'inner;
                     }
-                    //break 'inner;
                 }
             }
         }
-        //println!("before applying collisions");
         apply_collisions(predicted);
-        //println!("after applying collisions");
-        history.push_back(bodies);
+        history.push_back(
+            predicted
+                .bodies
+                .lock()
+                .expect("lock must be acquired on bodies prediction state")
+                .clone(),
+        );
         if early_exit {
             return;
         }

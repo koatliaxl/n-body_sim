@@ -34,6 +34,7 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
             compute_forces(&bodies, changes, forces, collisions);
             check_suspicion_hitboxes(&bodies, changes, delta_t);
             move_bodies(changes, forces, delta_t);
+            println!("after move bodies ({})", th_cfg.prediction);
             check_for_collisions(&bodies, changes, collisions);
             th_cfg
                 .sender
