@@ -24,21 +24,23 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
                 begin,
                 ref mut collisions,
             } = *guard;
+
+            collisions.clear();
             let bodies = bodies
                 .lock()
                 .expect("Worker: lock not acquired for parallel read");
 
-            collisions.clear();
             prepare_changes(&bodies, changes, task, begin);
-            compute_forces(&bodies, changes, forces, /*task, begin,*/ collisions);
+            compute_forces(&bodies, changes, forces, collisions);
             check_suspicion_hitboxes(&bodies, changes, delta_t);
-            move_bodies(changes, forces, delta_t /*, task, begin*/);
+            move_bodies(changes, forces, delta_t);
+            println!("after move bodies ({})", th_cfg.prediction);
             check_for_collisions(&bodies, changes, collisions);
-
             th_cfg
                 .sender
-                .send(Msg::TaskFinished)
+                .send(Msg::TaskFinished {})
                 .expect("Worker: failed to send msg.");
+            //println!("worker: task finished");
         } else if let Msg::Exit = msg {
             break;
         } else {

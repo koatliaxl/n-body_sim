@@ -39,6 +39,10 @@ pub fn view_pos_changed(
             w as f32, h as f32, 1.0, -0.1, /* fmt force new line */
         );
         gl_res.set_uniform_mat4x4("proj_mat", "Text shader", &proj_mat);*/
+
+        let traj_shader = gl_res.get_shader_gl_id("Trajectory shader");
+        gl::UseProgram(traj_shader);
+        gl_res.set_uniform_mat4x4("view_mat", "Trajectory shader", &view_mat);
     }
     state.update_ui_requested = true;
     //update_gui(state, world, window_size, gui)
@@ -57,6 +61,10 @@ pub fn view_scale_changed(gl_res: &GlData, state: &State, window_size: (i32, i32
         let shader = gl_res.get_shader_gl_id("Body shader");
         gl::UseProgram(shader);
         gl_res.set_uniform_mat4x4("proj_mat", "Body shader", &proj_mat);
+
+        let traj_shader = gl_res.get_shader_gl_id("Trajectory shader");
+        gl::UseProgram(traj_shader);
+        gl_res.set_uniform_mat4x4("proj_mat", "Trajectory shader", &proj_mat);
     }
 }
 

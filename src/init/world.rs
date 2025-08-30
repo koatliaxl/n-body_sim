@@ -4,7 +4,7 @@ use std::collections::HashMap;
 //use n_body_sim::ObjectType::Massive;
 use std::sync::{Arc, Mutex};
 
-pub fn init_world(number_threads: usize) -> World {
+pub fn init_world(number_threads: usize) -> (World, World) {
     let objects = vec![
         Body::new(3.5, 3.5, 1.8, -1.8, 1.0),
         Body::new(0.0, 0.0, 0.0, 0.0, 50.0),
@@ -20,7 +20,9 @@ pub fn init_world(number_threads: usize) -> World {
         }));
         number_threads
     ];*/
+    let prediction_state = Arc::new(Mutex::new(Vec::new()));
     let mut obj_bufs = Vec::new();
+    let mut pred_bufs = Vec::new();
     for _ in 0..number_threads {
         obj_bufs.push(Arc::new(Mutex::new(ObjBuffer {
             par_read: Arc::clone(&objects),
@@ -29,11 +31,28 @@ pub fn init_world(number_threads: usize) -> World {
             task: 0,
             begin: 0,
             collisions: HashMap::new(),
+            //prediction_state: Arc::clone(&prediction_state),
+        })));
+        //pred_bufs.push(Arc::clone(&obj_bufs[i]))
+        pred_bufs.push(Arc::new(Mutex::new(ObjBuffer {
+            par_read: Arc::clone(&prediction_state),
+            changes: Vec::new(),
+            forces: Vec::new(),
+            task: 0,
+            begin: 0,
+            collisions: HashMap::new(),
         })))
     }
-    World {
-        bodies: objects,
-        forces,
-        obj_mirror: obj_bufs,
-    }
+    (
+        World {
+            bodies: objects,
+            forces,
+            obj_mirror: obj_bufs,
+        },
+        World {
+            bodies: prediction_state,
+            forces: Vec::new(),
+            obj_mirror: pred_bufs,
+        },
+    )
 }

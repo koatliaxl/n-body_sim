@@ -16,7 +16,7 @@ pub fn update_gui(state: &State, world: &World, window_size: (i32, i32), gui: &m
                 let (r_px, _) = in_pixels((radius, 0.0), window_size);
                 let mut info_offset = Vector3::new(r_px as f32, 0.0, 0.0);
                 info_offset /= state.view_scale;
-                let mut pos_in_pixels = fix_screen_pos(pos_on_scr + info_offset, window_size);
+                let pos_in_pixels = fix_screen_pos(pos_on_scr + info_offset, window_size);
                 update_selected_info(gui, pos_in_pixels, body);
             }
         }

@@ -31,6 +31,9 @@ pub fn handle_events(
         for snd in &state.to_workers {
             snd.send(Msg::Exit).expect("main: failed to send msg.");
         }
+        for snd in &state.prediction.to_workers {
+            snd.send(Msg::Exit).expect("main: failed to send msg.");
+        }
     }
 
     for (_, event) in glfw::flush_messages(&events) {
@@ -56,6 +59,8 @@ pub fn handle_events(
                 }
                 if button == RightButton && action == Press {
                     state.selected = -1;
+                    state.prediction.history.clear();
+                    state.prediction.selected_ceased_to_exist_on = -1;
                 }
             }
             CursorPos(x, y) => {
