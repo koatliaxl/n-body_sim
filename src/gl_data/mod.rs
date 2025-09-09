@@ -74,7 +74,7 @@ impl GlData {
                 panic!("The is no variable \"{}\"", variable_name)
             }
         } else {
-            panic!("The is no shader of the name2: {}", shader_name)
+            panic!("The is no shader of the name: {}", shader_name)
         }
     }
 
@@ -87,7 +87,7 @@ impl GlData {
             self.var_locations
                 .insert(shader_name.to_string(), var_locations);
         } else {
-            panic!("The is no shader of the name3: {}", shader_name)
+            panic!("The is no shader of the name: {}", shader_name)
         }
     }
 
@@ -101,7 +101,7 @@ impl GlData {
                 return Some(*glyph);
             }
         }
-        //panic!("There is on glyph for: {}", char)
+        //panic!("There is no glyph for: {}", char)
         None
     }
 

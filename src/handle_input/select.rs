@@ -4,11 +4,7 @@ use mat_vec::{Matrix4x4, Vector3, Vector4};
 use n_body_sim::gui::{Label, RootGIE /*, GIE*/};
 use n_body_sim::Body;
 
-pub fn select_obj(
-    state: &mut State,
-    world: &World,
-    window_size: (i32, i32), /*gui: &mut RootGIE*/
-) {
+pub fn select_obj(state: &mut State, world: &World, window_size: (i32, i32)) {
     let (x, y) = (
         state.last_cursor_pos.0 as f32,
         state.last_cursor_pos.1 as f32,
@@ -57,10 +53,10 @@ pub fn calc_body_pos_on_screen(
     body: &Body,
 ) -> Vector3<f32> {
     let (w, h) = (window_size.0 as f32, window_size.1 as f32);
-    let (ox, oy, _) = body.pos.get_components();
-    let pos_vec4 = Vector4::new(ox as f32, oy as f32, 0.0, 1.0);
+    /*let (ox, oy, _) = body.pos.get_components();
+    let pos_vec4 = Vector4::new(ox as f32, oy as f32, 0.0, 1.0);*/
     //todo Vec4: new from Vec3
-    //let pos_vec4 = Vector4::from(o.pos);
+    let pos_vec4 = Vector4::from(&Vector3::<f32>::from(body.pos));
     let mut pos_on_scr = proj_mat.clone() * view_mat.clone() * pos_vec4;
     pos_on_scr.set_x((pos_on_scr.x() + 1.0) * 0.5 * w);
     pos_on_scr.set_y((1.0 - pos_on_scr.y()) * 0.5 * h);

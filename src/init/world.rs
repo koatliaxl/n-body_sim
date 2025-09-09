@@ -1,7 +1,5 @@
 use crate::{Body, ObjBuffer, World};
 use std::collections::HashMap;
-//use mat_vec::Vector3;
-//use n_body_sim::ObjectType::Massive;
 use std::sync::{Arc, Mutex};
 
 pub fn init_world(number_threads: usize) -> (World, World) {
@@ -11,8 +9,9 @@ pub fn init_world(number_threads: usize) -> (World, World) {
         Body::new(-8.0, -8.0, -1.0, 1.0, 2.0),
     ];
     let objects = Arc::new(Mutex::new(objects));
-    //let forces = vec![Vector3::default(); objects.len()];
     let forces = Vec::new();
+    // The next doesn't work as intended, in the vector initialized that way all Arcs are
+    // "connected", i.e. are references to the same value!
     /*let obj_bufs = vec![
         Arc::new(Mutex::new(ObjBuffer {
             objects: Vec::new(),
@@ -31,9 +30,7 @@ pub fn init_world(number_threads: usize) -> (World, World) {
             task: 0,
             begin: 0,
             collisions: HashMap::new(),
-            //prediction_state: Arc::clone(&prediction_state),
         })));
-        //pred_bufs.push(Arc::clone(&obj_bufs[i]))
         pred_bufs.push(Arc::new(Mutex::new(ObjBuffer {
             par_read: Arc::clone(&prediction_state),
             changes: Vec::new(),

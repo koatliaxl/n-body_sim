@@ -8,13 +8,17 @@ pub const TRAJECTORY_DRAW_BUFFER_SIZE: usize = 10 + 2;
 
 pub fn init_draw(gl_data: &mut GlData) {
     unsafe {
-        init_obj(gl_data);
-        init_pos_tex_dyn_draw(gl_data);
+        init_obj_draw(gl_data);
+        init_text_draw(gl_data);
         init_pos_dynamic_draw(gl_data);
+
+        // Worked without it, but in case...
+        gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+        gl::BindVertexArray(0);
     }
 }
 
-pub unsafe fn init_obj(gl_data: &mut GlData) {
+pub unsafe fn init_obj_draw(gl_data: &mut GlData) {
     use std::f32::consts::PI;
     let mut vertices = [0.0_f32; 32];
     for ang in 0..16 {
@@ -48,11 +52,11 @@ pub unsafe fn init_obj(gl_data: &mut GlData) {
         0 as *const c_void,
     );
     gl::EnableVertexAttribArray(0);
-    gl_data.add_vertex_array_gl_id("Only Position", vertex_array);
-    gl_data.add_vertex_buffer_gl_id("Circle", vertex_buf)
+    gl_data.add_vertex_buffer_gl_id("circle", vertex_buf);
+    gl_data.add_vertex_array_gl_id("only_position", vertex_array);
 }
 
-pub unsafe fn init_pos_tex_dyn_draw(gl_data: &mut GlData) {
+pub unsafe fn init_text_draw(gl_data: &mut GlData) {
     let mut vertex_buf = 0;
     gl::GenBuffers(1, &mut vertex_buf);
     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);
@@ -88,7 +92,7 @@ pub unsafe fn init_pos_tex_dyn_draw(gl_data: &mut GlData) {
     gl::EnableVertexAttribArray(1);
 
     gl_data.add_vertex_buffer_gl_id("dynamic-24", vertex_buf);
-    gl_data.add_vertex_array_gl_id("Position and Texture", vertex_array);
+    gl_data.add_vertex_array_gl_id("dynamic_pos_texture", vertex_array);
 }
 
 pub unsafe fn init_pos_dynamic_draw(gl_data: &mut GlData) {

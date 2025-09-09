@@ -30,11 +30,11 @@ pub fn draw(
 }
 
 unsafe fn draw_bodies(gl_res: &GlData, world: &World, state: &State) {
-    let shader = gl_res.get_shader_gl_id("Body shader");
+    let shader = gl_res.get_shader_gl_id("body_shader");
     gl::UseProgram(shader);
-    let vertex_buf = gl_res.get_vertex_buffer_gl_id("Circle");
+    let vertex_buf = gl_res.get_vertex_buffer_gl_id("circle");
     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);
-    let vertex_arr = gl_res.get_vertex_array_gl_id("Only Position");
+    let vertex_arr = gl_res.get_vertex_array_gl_id("only_position");
     gl::BindVertexArray(vertex_arr);
 
     for obj in world
@@ -48,9 +48,9 @@ unsafe fn draw_bodies(gl_res: &GlData, world: &World, state: &State) {
         let model_mat = Matrix4x4::new_translation_from_vec(pos);
         let scaling = Matrix4x4::new_uniform_scaling(obj.get_radius() as f32);
         let model_mat = model_mat * scaling;
-        gl_res.set_uniform_mat4x4("model_mat", "Body shader", &model_mat);
+        gl_res.set_uniform_mat4x4("model_mat", "body_shader", &model_mat);
         let color = Vector3::new(1.0, 0.1, 0.5);
-        gl_res.set_uniform_vec3f("color", "Body shader", color);
+        gl_res.set_uniform_vec3f("color", "body_shader", color);
         //gl::DrawArrays(gl::POINTS, 0, 16);
         if obj.get_id() == state.selected as u64 {
             gl::DrawArrays(gl::LINES, 0, 16);
@@ -61,12 +61,12 @@ unsafe fn draw_bodies(gl_res: &GlData, world: &World, state: &State) {
 }
 
 unsafe fn draw_trajectory(gl_res: &GlData, _world: &World, state: &State /*, cfg: &Config*/) {
-    let shader = gl_res.get_shader_gl_id("Trajectory shader");
+    let shader = gl_res.get_shader_gl_id("trajectory_shader");
     gl::UseProgram(shader);
     let vertex_arr = gl_res.get_vertex_array_gl_id("dynamic_only_position");
     gl::BindVertexArray(vertex_arr);
 
-    gl_res.set_uniform_vec3f("color", "Trajectory shader", Vector3::new(0.1, 0.3, 1.0));
+    gl_res.set_uniform_vec3f("color", "trajectory_shader", Vector3::new(0.1, 0.3, 1.0));
 
     let vertex_buf = gl_res.get_vertex_buffer_gl_id("dynamic-10");
     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);

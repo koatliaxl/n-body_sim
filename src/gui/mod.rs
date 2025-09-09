@@ -15,7 +15,6 @@ pub struct GieBase {
     pos: Vector3<i32>,
     name: String,
     pub visible: bool,
-    //gui_type: Box<dyn GieType>,
     pub meta_type: MetaType,
 }
 

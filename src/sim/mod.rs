@@ -4,7 +4,6 @@ use n_body_sim::BodyType::*;
 use n_body_sim::{split_task_length, Collision};
 use n_body_sim::{Body, ID_TABLE};
 use std::collections::HashMap;
-//use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
 
 pub use parallel::*;
@@ -28,7 +27,6 @@ pub struct ObjBuffer {
     pub task: usize,
     pub begin: usize,
     pub collisions: HashMap<u64, Collision>,
-    //pub prediction_state: Arc<Mutex<Vec<Body>>>,
 }
 
 pub fn begin_next_step(world: &World, delta_t: f64, state: &State, prediction_mode: bool) {
@@ -107,7 +105,6 @@ pub fn apply_collisions(world: &World) {
                     let momentum = *vel * *mass; // collision vel. is already relative
                     body.vel = momentum * (1.0 / (*mass + body.mass));
                     body.mass += *mass;
-                    //println!("collision applied");
                     body.update_radius();
                     break 'inner;
                 }

@@ -77,7 +77,7 @@ fn main() {
             && state.update_processed
         {
             if state.prediction.history.is_empty() {
-                println!("task given (non pred.)");
+                //println!("task given (non pred.)");
                 begin_next_step(&mut world, tic_duration / 1000.0, &mut state, false);
                 state.update_processed = false
             } else {
@@ -92,7 +92,6 @@ fn main() {
                 *world.bodies.lock().expect(
                     "applying next step from prediction: lock on bodies must be acquired",
                 ) = next_step;
-                //state.prediction.trajectory.pop_front();
                 state.update_ui_requested = true;
             }
             state.last_upd_time = Instant::now();

@@ -36,7 +36,6 @@ pub fn init_glyphs(gl_data: &mut GlData) {
         }
         let size = Vector3::new(mtr.width as i32, mtr.height as i32, 0);
         let bearing = Vector3::new(mtr.xmin, mtr.ymin, 0);
-        //println!("{}, {}; {}", mtr.xmin, mtr.ymin, mtr.advance_width);
         let glyph = Glyph {
             symbol: ch,
             texture_id,

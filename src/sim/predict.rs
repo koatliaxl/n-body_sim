@@ -56,14 +56,12 @@ pub fn predict(world: &World, state: &mut State, cfg: &Config, delta: f64) {
             ..
         } = state;
         update_world(predicted);
-        //let mut bodies = Vec::new();
         {
             let pred_state = predicted
                 .bodies
                 .lock()
                 .expect("lock must be acquired on bodies copy");
             for body in pred_state.iter() {
-                //bodies.push(body.clone());
                 if body.get_id() == *selected as u64 {
                     trajectory.push_back(body.pos);
                     if body.class == Removed {
