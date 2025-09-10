@@ -32,13 +32,13 @@ impl ObjectIdTable {
         }
         let new = range.end;
         range.end += 1;
-        let end = new; // because borrow checker complains
+        let end = new; // in this way, because borrow checker complains
 
         // check if merging needed:
         if self.ids.len() > 1 && end == self.ids[1].start {
             let next_end = self.ids.remove(1).end;
             //range.end = next_end
-            self.ids[0].end = next_end // because borrow checker complains
+            self.ids[0].end = next_end // in this way, because borrow checker complains
         }
         new
     }

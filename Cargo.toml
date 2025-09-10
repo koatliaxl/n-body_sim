@@ -1,6 +1,6 @@
 [package]
 name = "n-body_sim"
-version = "0.1.2"
+version = "0.1.4"
 edition = "2018"
 build = "gl/build.rs"
 default-run = "n-body_sim"
@@ -11,6 +11,7 @@ default-run = "n-body_sim"
 gl_generator = "0.14.0"
 
 [dependencies]
+num_cpus = "1.17"
 fontdue = "0.9.3"
 
 [dependencies.glfw]

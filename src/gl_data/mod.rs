@@ -1,5 +1,5 @@
 use crate::gl;
-use mat_vec::{Matrix4x4, Vector3};
+use mat_vec::{Matrix4x4, Vector3, Vector4};
 use std::collections::HashMap;
 
 pub struct GlData {
@@ -74,7 +74,7 @@ impl GlData {
                 panic!("The is no variable \"{}\"", variable_name)
             }
         } else {
-            panic!("The is no shader of the name2: {}", shader_name)
+            panic!("The is no shader of the name: {}", shader_name)
         }
     }
 
@@ -87,7 +87,7 @@ impl GlData {
             self.var_locations
                 .insert(shader_name.to_string(), var_locations);
         } else {
-            panic!("The is no shader of the name3: {}", shader_name)
+            panic!("The is no shader of the name: {}", shader_name)
         }
     }
 
@@ -101,7 +101,7 @@ impl GlData {
                 return Some(*glyph);
             }
         }
-        //panic!("There is on glyph for: {}", char)
+        //panic!("There is no glyph for: {}", char)
         None
     }
 
@@ -110,6 +110,12 @@ impl GlData {
         let var_location = self.get_variable_location(shader_program, name);
         let (v1, v2, v3) = vec.get_components();
         gl::Uniform3f(var_location, v1, v2, v3);
+    }
+
+    pub unsafe fn set_uniform_vec4f(&self, name: &str, shader_program: &str, vec: Vector4<f32>) {
+        let var_location = self.get_variable_location(shader_program, name);
+        let (v1, v2, v3, v4) = vec.get_components();
+        gl::Uniform4f(var_location, v1, v2, v3, v4);
     }
 
     pub unsafe fn set_uniform_mat4x4(

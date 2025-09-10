@@ -31,20 +31,23 @@ pub fn handle_events(
         for snd in &state.to_workers {
             snd.send(Msg::Exit).expect("main: failed to send msg.");
         }
+        for snd in &state.prediction.to_workers {
+            snd.send(Msg::Exit).expect("main: failed to send msg.");
+        }
     }
 
     for (_, event) in glfw::flush_messages(&events) {
         match event {
             Size(w, h) => {
                 unsafe { gl::Viewport(0, 0, w, h) }
-                view_pos_changed(gl_data, state, (w, h) /*, world*//*, gui*/);
+                view_pos_changed(gl_data, state, (w, h));
                 view_scale_changed(gl_data, state, (w, h));
                 window_size_changed(gl_data, (w, h));
             }
             MouseButton(button, action, _) => {
                 if button == LeftButton && action == Press {
                     state.left_mouse_bt_was_pressed = true;
-                    select_obj(state, &world, window.get_size() /*, gui*/);
+                    select_obj(state, &world, window.get_size());
                     state.cursor_pos_when_press = state.last_cursor_pos;
                 }
                 if button == LeftButton && action == Release {
@@ -56,17 +59,18 @@ pub fn handle_events(
                 }
                 if button == RightButton && action == Press {
                     state.selected = -1;
+                    state.prediction.history.clear();
+                    state.prediction.selected_ceased_to_exist_on = -1;
                 }
             }
             CursorPos(x, y) => {
                 state.last_cursor_pos = (x, y);
                 if state.left_mouse_bt_was_pressed {
-                    view_pos_changed(&gl_data, state, window.get_size() /*world,*/ /*gui*/)
+                    view_pos_changed(&gl_data, state, window.get_size())
                 }
             }
             Scroll(_, s) => {
                 state.view_scale -= s as f32 * 0.8;
-                //println!("view scale: {}", state.view_scale);
                 view_scale_changed(&gl_data, &state, window.get_size());
                 state.update_ui_requested = true;
             }

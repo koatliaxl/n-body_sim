@@ -1,7 +1,6 @@
 use super::{GieBase, GIE};
 use crate::GlData;
 use std::any::Any;
-//use crate::gui::MetaType::Compound;
 
 pub struct Label {
     base: GieBase,

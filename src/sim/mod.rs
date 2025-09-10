@@ -4,18 +4,21 @@ use n_body_sim::BodyType::*;
 use n_body_sim::{split_task_length, Collision};
 use n_body_sim::{Body, ID_TABLE};
 use std::collections::HashMap;
-//use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
 
 pub use parallel::*;
+pub use predict::*;
 
 mod parallel;
+mod predict;
 
 pub struct World {
     pub bodies: Arc<Mutex<Vec<Body>>>,
     pub forces: Vec<Vector3<f64>>,
     pub obj_mirror: Vec<Arc<Mutex<ObjBuffer>>>,
 }
+
+impl World {}
 
 pub struct ObjBuffer {
     pub par_read: Arc<Mutex<Vec<Body>>>, // for the parallel reading, but consecutive write
@@ -26,9 +29,9 @@ pub struct ObjBuffer {
     pub collisions: HashMap<u64, Collision>,
 }
 
-pub fn begin_next_step(world: &mut World, delta_t: f64, state: &State) {
+pub fn begin_next_step(world: &World, delta_t: f64, state: &State, prediction_mode: bool) {
     let bodies = world.bodies.lock().expect("Main: failed to acquire lock");
-    let tasks = split_task_length(bodies.len(), state.workers.len());
+    let tasks = split_task_length(bodies.len(), state.workers.len()); //todo potential bug
     let mut offset = 0;
     for i in 0..tasks.len() {
         let mut guard = world.obj_mirror[i]
@@ -38,24 +41,37 @@ pub fn begin_next_step(world: &mut World, delta_t: f64, state: &State) {
         guard.begin = offset;
         offset += tasks[i];
     }
-    for sender in &state.to_workers {
+    let to_workers = if !prediction_mode {
+        &state.to_workers
+    } else {
+        &state.prediction.to_workers
+    };
+    for sender in to_workers {
         sender
             .send(Msg::NewTask { delta_t })
             .expect("Main: failed to send msg.");
     }
 }
 
-pub fn check_if_tasks_finished(state: &mut State) {
-    if let Ok(msg) = state.from_workers.try_recv() {
-        if let Msg::TaskFinished = msg {
-            state.received += 1;
-        } else {
-            panic!("Main: received wrong message")
+pub fn check_if_tasks_finished(state: &mut State, prediction: bool) {
+    if !prediction {
+        if let Ok(msg) = state.from_workers.try_recv() {
+            match msg {
+                Msg::TaskFinished {} => state.task_done_count += 1,
+                _ => panic!("Main: received wrong message"),
+            }
+        }
+    } else {
+        if let Ok(msg) = state.prediction.from_workers.try_recv() {
+            match msg {
+                Msg::TaskFinished {} => state.prediction.task_done_count += 1,
+                _ => panic!("Main: received wrong message"),
+            }
         }
     }
 }
 
-pub fn update_world(world: &mut World) {
+pub fn update_world(world: &World) {
     let mut bodies = world
         .bodies
         .lock()
@@ -75,7 +91,7 @@ pub fn update_world(world: &mut World) {
     }
 }
 
-pub fn apply_collisions(world: &mut World) {
+pub fn apply_collisions(world: &World) {
     let mut bodies = world
         .bodies
         .lock()
@@ -89,7 +105,6 @@ pub fn apply_collisions(world: &mut World) {
                     let momentum = *vel * *mass; // collision vel. is already relative
                     body.vel = momentum * (1.0 / (*mass + body.mass));
                     body.mass += *mass;
-                    //println!("collision applied");
                     body.update_radius();
                     break 'inner;
                 }
@@ -100,6 +115,11 @@ pub fn apply_collisions(world: &mut World) {
 }
 
 pub fn apply_commands(world: &mut World, state: &mut State) {
+    if state.command_queue.is_empty() {
+        return;
+    } else {
+        state.prediction.devalidate_history()
+    }
     let mut bodies = world
         .bodies
         .lock()

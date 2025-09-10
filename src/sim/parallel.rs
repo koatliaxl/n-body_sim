@@ -1,10 +1,9 @@
 use crate::{Msg, ObjBuffer, ThreadConfig};
 use mat_vec::Vector3;
 use n_body_sim::BodyType::*;
+use n_body_sim::SuspectCollChange::*;
 use n_body_sim::{Body, Collision};
 use std::collections::HashMap;
-//use std::sync::mpsc::{Receiver, Sender};
-use n_body_sim::SuspectCollChange::*;
 use std::sync::{Arc, Mutex};
 
 pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) {
@@ -24,20 +23,20 @@ pub fn compute_in_parallel(th_cfg: ThreadConfig, mirror: Arc<Mutex<ObjBuffer>>) 
                 begin,
                 ref mut collisions,
             } = *guard;
+
+            collisions.clear();
             let bodies = bodies
                 .lock()
                 .expect("Worker: lock not acquired for parallel read");
 
-            collisions.clear();
             prepare_changes(&bodies, changes, task, begin);
-            compute_forces(&bodies, changes, forces, /*task, begin,*/ collisions);
+            compute_forces(&bodies, changes, forces, collisions);
             check_suspicion_hitboxes(&bodies, changes, delta_t);
-            move_bodies(changes, forces, delta_t /*, task, begin*/);
+            move_bodies(changes, forces, delta_t);
             check_for_collisions(&bodies, changes, collisions);
-
             th_cfg
                 .sender
-                .send(Msg::TaskFinished)
+                .send(Msg::TaskFinished {})
                 .expect("Worker: failed to send msg.");
         } else if let Msg::Exit = msg {
             break;
@@ -59,7 +58,6 @@ fn check_for_collisions(
                 let dist = diff.length();
                 if dist < body.get_radius() {
                     add_to_collisions(collisions, body, body_2);
-                    //println!("late collision happened")
                 }
             }
         }
@@ -152,7 +150,6 @@ fn compute_forces(
                                 add_to_collisions(collisions, body, body_2);
                             }
                         }
-                        //println!("early collision happened");
                         break 'l1;
                     }
                     let dir = -displacement.normalize();
@@ -175,7 +172,6 @@ fn add_to_collisions(collisions: &mut HashMap<u64, Collision>, body: &mut Body, 
         let momentum_2 = rel_vel * body.mass;
         *vel = (momentum_1 + momentum_2) * (1.0 / (*mass + body.mass));
         *mass += body.mass;
-        //println!("collision mass: {}", *mass)
     } else {
         collisions.insert(
             to_body.get_id(),
@@ -184,7 +180,6 @@ fn add_to_collisions(collisions: &mut HashMap<u64, Collision>, body: &mut Body, 
                 vel: to_body.vel - body.vel,
             },
         );
-        //println!("collision mass: {}", body.mass)
     }
     body.class = Removed;
 }

@@ -6,13 +6,13 @@ use n_body_sim::{gl, SIZE_OF_GL_FLOAT};
 static WHITESPACE_WIDTH: f32 = 10.0;
 
 pub unsafe fn draw_text(gl_res: &GlData, text: &str, pos: (i32, i32), scale: f32) {
-    let shader_id = gl_res.get_shader_gl_id("Text shader");
+    let shader_id = gl_res.get_shader_gl_id("text_shader");
     gl::UseProgram(shader_id);
-    let vertex_arr = gl_res.get_vertex_array_gl_id("Position and Texture");
+    let vertex_arr = gl_res.get_vertex_array_gl_id("position_and_texture");
     gl::BindVertexArray(vertex_arr);
     gl::ActiveTexture(gl::TEXTURE0);
 
-    gl_res.set_uniform_vec3f("text_color", "Text shader", Vector3::new(0.7, 0.3, 0.1));
+    gl_res.set_uniform_vec3f("text_color", "text_shader", Vector3::new(0.7, 0.3, 0.1));
 
     let mut text_x = pos.0; // in pixels
     let text_y = pos.1; // in pixels
