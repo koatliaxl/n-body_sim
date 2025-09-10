@@ -28,7 +28,6 @@ impl State {
             to_workers.push(to_worker);
             jh_vec.push(jh)
         }
-        //state.from_workers = from_workers;
 
         let mut to_pred_workers = Vec::new();
         let mut jh_pred = Vec::new();

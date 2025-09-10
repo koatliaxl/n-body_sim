@@ -10,7 +10,7 @@ pub fn init_draw(gl_data: &mut GlData) {
     unsafe {
         init_obj_draw(gl_data);
         init_text_draw(gl_data);
-        init_pos_dynamic_draw(gl_data);
+        init_trajectory_buf(gl_data);
 
         // Worked without it, but in case...
         gl::BindBuffer(gl::ARRAY_BUFFER, 0);
@@ -92,10 +92,10 @@ pub unsafe fn init_text_draw(gl_data: &mut GlData) {
     gl::EnableVertexAttribArray(1);
 
     gl_data.add_vertex_buffer_gl_id("dynamic-24", vertex_buf);
-    gl_data.add_vertex_array_gl_id("dynamic_pos_texture", vertex_array);
+    gl_data.add_vertex_array_gl_id("position_and_texture", vertex_array);
 }
 
-pub unsafe fn init_pos_dynamic_draw(gl_data: &mut GlData) {
+pub unsafe fn init_trajectory_buf(gl_data: &mut GlData) {
     let mut vertex_buf = 0;
     gl::GenBuffers(1, &mut vertex_buf);
     gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buf);

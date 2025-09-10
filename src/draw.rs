@@ -64,6 +64,7 @@ unsafe fn draw_trajectory(gl_res: &GlData, _world: &World, state: &State /*, cfg
     let shader = gl_res.get_shader_gl_id("trajectory_shader");
     gl::UseProgram(shader);
     let vertex_arr = gl_res.get_vertex_array_gl_id("dynamic_only_position");
+    //let vertex_arr = gl_res.get_vertex_array_gl_id("only_position");
     gl::BindVertexArray(vertex_arr);
 
     gl_res.set_uniform_vec3f("color", "trajectory_shader", Vector3::new(0.1, 0.3, 1.0));

@@ -24,10 +24,10 @@ pub fn create_body(state: &mut State, window_size: (i32, i32)) {
         10.0,
         0.1,
     );
-    let world_pos = inv_view * inv_proj * screen_pos; //todo vec3 conv.
-    let (wx, wy, _, _) = world_pos.get_components();
+    let world_pos = inv_view * inv_proj * screen_pos;
+    //let (wx, wy, _, _) = world_pos.get_components();
     let command = Command::Create {
-        pos: Vector3::new(wx as f64, wy as f64, 0.0),
+        pos: Vector3::from(world_pos),
         vel: Vector3::new(0.0, 0.0, 0.0),
         mass: state.new_obj_mass,
         class: Massive,

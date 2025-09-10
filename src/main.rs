@@ -33,7 +33,8 @@ fn main() {
     gl::load_with(|s| window.get_proc_address(s));
     init_open_gl(window.get_size());
     init_shaders(&mut gl_data);
-    let num_of_threads = 3;
+    let num_of_threads = num_cpus::get();
+    println!("This system has {} threads", num_of_threads);
     let (mut world, prediction) = init_world(num_of_threads);
     init_draw(&mut gl_data);
     init_glyphs(&mut gl_data);
@@ -77,7 +78,6 @@ fn main() {
             && state.update_processed
         {
             if state.prediction.history.is_empty() {
-                //println!("task given (non pred.)");
                 begin_next_step(&mut world, tic_duration / 1000.0, &mut state, false);
                 state.update_processed = false
             } else {
@@ -95,6 +95,7 @@ fn main() {
                 state.update_ui_requested = true;
             }
             state.last_upd_time = Instant::now();
+            apply_commands(&mut world, &mut state);
         }
         if state.task_done_count < state.workers.len() {
             check_if_tasks_finished(&mut state, false);

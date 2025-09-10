@@ -8,7 +8,7 @@ static WHITESPACE_WIDTH: f32 = 10.0;
 pub unsafe fn draw_text(gl_res: &GlData, text: &str, pos: (i32, i32), scale: f32) {
     let shader_id = gl_res.get_shader_gl_id("text_shader");
     gl::UseProgram(shader_id);
-    let vertex_arr = gl_res.get_vertex_array_gl_id("dynamic_pos_texture");
+    let vertex_arr = gl_res.get_vertex_array_gl_id("position_and_texture");
     gl::BindVertexArray(vertex_arr);
     gl::ActiveTexture(gl::TEXTURE0);
 
