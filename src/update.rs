@@ -2,11 +2,19 @@ use crate::draw::BODY_GFX_SCALE;
 use crate::handle_input::select::*;
 use crate::sim::World;
 use crate::state_and_cfg::State;
+use crate::Statistic;
+use core::time::Duration;
 use mat_vec::Vector3;
-use n_body_sim::gui::RootGIE;
+use n_body_sim::gui::{Label, RootGIE};
 use n_body_sim::support::in_pixels;
 
-pub fn update_gui(state: &State, world: &World, window_size: (i32, i32), gui: &mut RootGIE) {
+pub fn update_gui_state(
+    state: &State,
+    world: &World,
+    window_size: (i32, i32),
+    gui: &mut RootGIE,
+    statistic: &Statistic,
+) {
     if state.selected > -1 {
         let (proj, view) = calc_matrices(state, window_size);
         for body in world.bodies.lock().expect("Lock must be acquired").iter() {
@@ -21,10 +29,41 @@ pub fn update_gui(state: &State, world: &World, window_size: (i32, i32), gui: &m
             }
         }
     } else {
-        gui.get_gie("body_pos_text").unwrap().get_base_mut().visible = false;
-        gui.get_gie("body_mass_text")
+        gui.get_gie("body_pos_label")
+            .unwrap()
+            .get_base_mut()
+            .visible = false;
+        gui.get_gie("body_mass_label")
             .unwrap()
             .get_base_mut()
             .visible = false;
     }
+
+    gui.get_gie("ups_counter")
+        .unwrap()
+        .get_type()
+        .downcast_mut::<Label>()
+        .expect("GIE must be downcast")
+        .change_text(format!("UPS: {}", state.ups));
+    gui.get_gie("fps_counter")
+        .unwrap()
+        .get_type()
+        .downcast_mut::<Label>()
+        .expect("GIE must be downcast")
+        .change_text(format!("FPS: {}", state.fps));
+
+    let mut sum = Duration::from_secs(0);
+    for m in &statistic.upd_measure_history {
+        sum += *m;
+    }
+    let average = (sum.as_secs_f32() * 1000.0) / statistic.upd_measure_num as f32;
+    gui.get_gie("upd_average")
+        .unwrap()
+        .get_type()
+        .downcast_mut::<Label>()
+        .expect("GIE must be downcast")
+        .change_text(format!(
+            "Average of {} updates (millis): {:.5}",
+            statistic.upd_measure_num, average
+        ));
 }

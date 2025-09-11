@@ -38,9 +38,10 @@ fn main() {
     let (mut world, prediction) = init_world(num_of_threads);
     init_draw(&mut gl_data);
     init_glyphs(&mut gl_data);
-    let mut state = State::new(&world.obj_mirror, prediction);
-    let mut gui = init_gui();
+    let mut state = State::new(&world.obj_mirrors, prediction);
+    let mut gui = init_gui(window.get_size());
     let cfg = Config::new();
+    let mut statistic = Statistic::new();
 
     view_pos_changed(&gl_data, &mut state, window.get_size());
     view_scale_changed(&gl_data, &state, window.get_size());
@@ -50,6 +51,7 @@ fn main() {
     //let mut update_processed = true;
     let mut last_frame_time = Instant::now();
     let mut between_frames = 0.0;
+
     while !window.should_close() {
         if state.fps_changed {
             between_frames = 1000.0 / state.fps as f64;
@@ -79,8 +81,11 @@ fn main() {
         {
             if state.prediction.history.is_empty() {
                 begin_next_step(&mut world, tic_duration / 1000.0, &mut state, false);
-                state.update_processed = false
+                state.update_processed = false;
+                statistic.on_prediction_mode(false);
             } else {
+                state.last_upd_time = Instant::now(); // this only for measuring performance,
+                                                      // logically it's doesn't matter
                 let next_step = if let Some(bodies) = state.progress_to_next_step() {
                     bodies
                 } else {
@@ -93,6 +98,9 @@ fn main() {
                     "applying next step from prediction: lock on bodies must be acquired",
                 ) = next_step;
                 state.update_ui_requested = true;
+                statistic.on_prediction_mode(true);
+                statistic.last_update_took = state.last_upd_time.elapsed();
+                statistic.add_upd_measure(state.last_upd_time.elapsed());
             }
             state.last_upd_time = Instant::now();
             apply_commands(&mut world, &mut state);
@@ -107,11 +115,13 @@ fn main() {
             state.task_done_count = 0;
             state.update_ui_requested = true;
             state.progress_to_next_step();
+            statistic.last_update_took = state.last_upd_time.elapsed();
+            statistic.add_upd_measure(state.last_upd_time.elapsed());
         }
         glfw.poll_events();
         handle_events(&mut window, &events, &mut state, &gl_data, &world, &mut gui);
         if state.update_ui_requested {
-            update_gui(&mut state, &world, window.get_size(), &mut gui);
+            update_gui_state(&mut state, &world, window.get_size(), &mut gui, &statistic);
             state.update_ui_requested = false
         }
     }

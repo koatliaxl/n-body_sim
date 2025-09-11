@@ -14,14 +14,14 @@ mod predict;
 
 pub struct World {
     pub bodies: Arc<Mutex<Vec<Body>>>,
-    pub forces: Vec<Vector3<f64>>,
-    pub obj_mirror: Vec<Arc<Mutex<ObjBuffer>>>,
+    pub forces: Vec<Vector3<f64>>, // not used
+    pub obj_mirrors: Vec<Arc<Mutex<ObjBuffer>>>,
 }
 
 impl World {}
 
 pub struct ObjBuffer {
-    pub par_read: Arc<Mutex<Vec<Body>>>, // for the parallel reading, but consecutive write
+    pub par_read: Arc<Mutex<Vec<Body>>>,
     pub changes: Vec<Body>,
     pub forces: Vec<Vector3<f64>>,
     pub task: usize,
@@ -34,7 +34,7 @@ pub fn begin_next_step(world: &World, delta_t: f64, state: &State, prediction_mo
     let tasks = split_task_length(bodies.len(), state.workers.len()); //todo potential bug
     let mut offset = 0;
     for i in 0..tasks.len() {
-        let mut guard = world.obj_mirror[i]
+        let mut guard = world.obj_mirrors[i]
             .lock()
             .expect(" Main: lock not acquired");
         guard.task = tasks[i];
@@ -77,7 +77,7 @@ pub fn update_world(world: &World) {
         .lock()
         .expect("Main: lock not acquired on bodies");
     let mut i = 0;
-    for mir in &world.obj_mirror {
+    for mir in &world.obj_mirrors {
         let mut guard = mir.lock().expect("Main: lock not acquired on obj. buffer");
         let ObjBuffer {
             ref mut changes,
@@ -96,7 +96,7 @@ pub fn apply_collisions(world: &World) {
         .bodies
         .lock()
         .expect("Main: lock not acquired on bodies");
-    for mir in &world.obj_mirror {
+    for mir in &world.obj_mirrors {
         let mut guard = mir.lock().expect("Main: lock not acquired on obj. buffer");
         for (id, Collision { mass, vel }) in guard.collisions.iter_mut() {
             'inner: for body in bodies.iter_mut() {

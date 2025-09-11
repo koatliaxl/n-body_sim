@@ -5,6 +5,7 @@ use n_body_sim::{gl, SIZE_OF_GL_FLOAT};
 
 static WHITESPACE_WIDTH: f32 = 10.0;
 
+//todo multi-line
 pub unsafe fn draw_text(gl_res: &GlData, text: &str, pos: (i32, i32), scale: f32) {
     let shader_id = gl_res.get_shader_gl_id("text_shader");
     gl::UseProgram(shader_id);
