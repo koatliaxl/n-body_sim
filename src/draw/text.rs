@@ -20,9 +20,9 @@ pub unsafe fn draw_text(gl_res: &GlData, text: &str, pos: (i32, i32), scale: f32
     for ch in text.chars() {
         if let Some(glyph) = gl_res.get_glyph(ch) {
             let ch_x = (text_x + glyph.bearing.x()) as f32;
-            let ch_y = text_y as f32 + glyph.bearing.y() as f32 * scale;
             let ch_w = glyph.size.x() as f32 * scale;
             let ch_h = glyph.size.y() as f32 * scale;
+            let ch_y = -ch_h + text_y as f32 - glyph.bearing.y() as f32 * scale;
             let vertices = [
                 [ch_x, ch_y + ch_h, 0.0, 0.0],
                 [ch_x, ch_y, 0.0, 1.0],
