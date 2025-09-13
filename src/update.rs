@@ -24,7 +24,6 @@ pub fn update_gui_state(
                 let (r_px, _) = in_pixels((radius, 0.0), window_size);
                 let mut info_offset = Vector3::new(r_px as f32, 0.0, 0.0);
                 info_offset /= state.view_scale;
-                //let pos_in_pixels = conv_coord_base(pos_on_scr + info_offset, window_size);
                 let (x, y, _) = (pos_on_scr + info_offset).get_components();
                 update_selected_info(gui, (x as i32, y as i32), body);
             }
@@ -64,7 +63,10 @@ pub fn update_gui_state(
         .downcast_mut::<Label>()
         .expect("GIE must be downcast")
         .change_text(format!(
-            "Average of {} updates (millis): {:.5}",
-            statistic.upd_measure_num, average
+            "Last update took: {:2}\n\
+            Average of {} updates (millis): {:.5}",
+            statistic.upd_measure_num,
+            average,
+            statistic.last_update_took.as_secs_f32() * 1000.0
         ));
 }
