@@ -51,6 +51,7 @@ fn main() {
     //let mut update_processed = true;
     let mut last_frame_time = Instant::now();
     let mut between_frames = 0.0;
+    let mut last_second_interval = Instant::now();
 
     while !window.should_close() {
         if state.fps_changed {
@@ -69,6 +70,7 @@ fn main() {
             window.swap_buffers();
             last_frame_time = Instant::now();
             //state.redraw_requested = false
+            statistic.frames_count += 1;
         }
         if state.ups_changed {
             tic_duration = 1000.0 / state.ups as f64;
@@ -101,6 +103,7 @@ fn main() {
                 statistic.on_prediction_mode(true);
                 statistic.last_update_took = state.last_upd_time.elapsed();
                 statistic.add_upd_measure(state.last_upd_time.elapsed());
+                statistic.upd_count += 1;
             }
             state.last_upd_time = Instant::now();
             apply_commands(&mut world, &mut state);
@@ -117,12 +120,21 @@ fn main() {
             state.progress_to_next_step();
             statistic.last_update_took = state.last_upd_time.elapsed();
             statistic.add_upd_measure(state.last_upd_time.elapsed());
+            statistic.upd_count += 1;
         }
         glfw.poll_events();
         handle_events(&mut window, &events, &mut state, &gl_data, &world, &mut gui);
         if state.update_ui_requested {
             update_gui_state(&mut state, &world, window.get_size(), &mut gui, &statistic);
             state.update_ui_requested = false
+        }
+        let since_last_second = last_second_interval.elapsed();
+        if since_last_second.as_secs_f64() >= 1.0 {
+            last_second_interval = Instant::now();
+            statistic.ups = statistic.upd_count as f64 / since_last_second.as_secs_f64();
+            statistic.upd_count = 0;
+            statistic.fps = statistic.frames_count as f64 / since_last_second.as_secs_f64();
+            statistic.frames_count = 0;
         }
     }
     for jh in state.workers {

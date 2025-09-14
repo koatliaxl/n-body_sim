@@ -44,13 +44,13 @@ pub fn update_gui_state(
         .get_type()
         .downcast_mut::<Label>()
         .expect("GIE must be downcast")
-        .change_text(format!("UPS: {}", state.ups));
+        .change_text(format!("UPS: {:.1}", statistic.ups));
     gui.get_gie("fps_counter")
         .unwrap()
         .get_type()
         .downcast_mut::<Label>()
         .expect("GIE must be downcast")
-        .change_text(format!("FPS: {}", state.fps));
+        .change_text(format!("FPS: {:.1}", statistic.fps));
 
     let mut sum = Duration::from_secs(0);
     for m in &statistic.upd_measure_history {

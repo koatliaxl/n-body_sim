@@ -88,6 +88,10 @@ pub struct Statistic {
     pub upd_measure_history: VecDeque<Duration>,
     pub upd_measure_num: usize,
     pub on_prediction_mode: bool,
+    pub upd_count: u32,
+    pub ups: f64,
+    pub frames_count: u32,
+    pub fps: f64,
 }
 
 /*pub enum UpdateMode {
@@ -111,6 +115,10 @@ impl Statistic {
             upd_measure_history: VecDeque::new(),
             upd_measure_num: 180,
             on_prediction_mode: false,
+            upd_count: 0,
+            ups: 0.0,
+            frames_count: 0,
+            fps: 0.0,
         }
     }
 
