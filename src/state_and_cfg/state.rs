@@ -33,9 +33,9 @@ impl State {
         let mut jh_pred = Vec::new();
         let (to_main_from_pw, from_pred_w) = mpsc::channel();
         let last_id = data_mirrors.len();
-        for i in last_id..last_id + prediction_holder.obj_mirror.len() {
+        for i in last_id..last_id + prediction_holder.obj_mirrors.len() {
             let (to_pred_w, from_main) = mpsc::channel();
-            let mirror = Arc::clone(&prediction_holder.obj_mirror[i - last_id]);
+            let mirror = Arc::clone(&prediction_holder.obj_mirrors[i - last_id]);
             let th_cfg = ThreadConfig {
                 receiver: from_main,
                 sender: to_main_from_pw.clone(),

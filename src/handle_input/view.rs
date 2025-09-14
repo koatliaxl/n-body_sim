@@ -55,9 +55,11 @@ pub fn window_size_changed(gl_res: &GlData, window_size: (i32, i32)) {
     let (w, h) = window_size;
     unsafe {
         gl::UseProgram(text_shader);
-        let proj_mat = Matrix4x4::<f32>::new_orthographic_projection(
-            w as f32, h as f32, 1.0, -0.1, /* fmt force new line */
+        let proj_mat = Matrix4x4::new_orthographic_projection(
+            w as f32, -h as f32, 1.0, -0.1, /* fmt force new line */
         );
         gl_res.set_uniform_mat4x4("proj_mat", "text_shader", &proj_mat);
+        let pos_mat = Matrix4x4::new_translation(-1.0, 1.0, 0.0);
+        gl_res.set_uniform_mat4x4("pos_mat", "text_shader", &pos_mat);
     }
 }

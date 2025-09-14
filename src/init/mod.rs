@@ -153,4 +153,5 @@ pub fn init_shaders(gl_data: &mut GlData) {
         gl::DeleteShader(text_frag);
         gl::DeleteShader(traj_vertex);
     }
+    println!()
 }

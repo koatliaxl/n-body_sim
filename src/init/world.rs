@@ -44,12 +44,12 @@ pub fn init_world(number_threads: usize) -> (World, World) {
         World {
             bodies: objects,
             forces,
-            obj_mirror: obj_bufs,
+            obj_mirrors: obj_bufs,
         },
         World {
             bodies: prediction_state,
             forces: Vec::new(),
-            obj_mirror: pred_bufs,
+            obj_mirrors: pred_bufs,
         },
     )
 }

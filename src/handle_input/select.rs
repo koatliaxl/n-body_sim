@@ -60,16 +60,8 @@ pub fn calc_body_pos_on_screen(
     pos_on_scr.into()
 }
 
-pub fn fix_screen_pos(pos_on_scr: Vector3<f32>, window_size: (i32, i32)) -> (i32, i32) {
-    let (w, h) = (window_size.0 as f32, window_size.1 as f32);
-    (
-        (pos_on_scr.x() - w / 2.0) as i32,
-        (-pos_on_scr.y() + h / 2.0) as i32,
-    )
-}
-
 pub fn update_selected_info(gui: &mut RootGIE, mut pos_on_scr: (i32, i32), body: &Body) {
-    let pos_label = gui.get_gie("body_pos_text").unwrap();
+    let pos_label = gui.get_gie("body_pos_label").unwrap();
     pos_label.change_pos(pos_on_scr);
     pos_label
         .get_type()
@@ -77,13 +69,13 @@ pub fn update_selected_info(gui: &mut RootGIE, mut pos_on_scr: (i32, i32), body:
         .expect("failed to downcast GIE as Label")
         .change_text(format!("{:.2}, {:.2}", body.pos.x(), body.pos.y()));
     pos_label.get_base_mut().visible = true;
-    let mass_label = gui.get_gie("body_mass_text").unwrap();
+    let mass_label = gui.get_gie("body_mass_label").unwrap();
     pos_on_scr.1 -= 15;
     mass_label.change_pos(pos_on_scr);
     mass_label
         .get_type()
         .downcast_mut::<Label>()
         .expect("failed to downcast GIE as Label")
-        .change_text(format!("mass: {}", body.mass));
+        .change_text(format!("mass: {:}", body.mass));
     mass_label.get_base_mut().visible = true;
 }
