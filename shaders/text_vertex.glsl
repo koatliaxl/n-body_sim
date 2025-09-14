@@ -10,6 +10,5 @@ uniform mat4 proj_mat;
 
 void main() {
     gl_Position = pos_mat * proj_mat * vec4(pos.x, pos.y, 0.0, 1.0);
-    //TexCoords = tex_coords;
     TexCoords = vec2(tex_coords.x, 1.0 - tex_coords.y);
 }

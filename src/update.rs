@@ -63,8 +63,8 @@ pub fn update_gui_state(
         .downcast_mut::<Label>()
         .expect("GIE must be downcast")
         .change_text(format!(
-            "Last update took: {:2}\n\
-            Average of {} updates (millis): {:.5}",
+            "Last update took: {2:}\n\
+            Average of {0:} updates (millis): {1:.5}",
             statistic.upd_measure_num,
             average,
             statistic.last_update_took.as_secs_f32() * 1000.0

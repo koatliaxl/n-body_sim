@@ -1,19 +1,25 @@
 use crate::GlData;
-use mat_vec::Vector3;
+use mat_vec::Vector4;
 use n_body_sim::gl::types::GLvoid;
 use n_body_sim::{gl, SIZE_OF_GL_FLOAT};
 
 static WHITESPACE_WIDTH: f32 = 10.0;
 static NEW_LINE_SEPARATION: f32 = 4.0;
 
-pub unsafe fn draw_text(gl_res: &GlData, text: &str, pos: (i32, i32), scale: f32) {
+pub unsafe fn draw_text(
+    gl_res: &GlData,
+    text: &str,
+    pos: (i32, i32),
+    scale: f32,
+    color: Vector4<f32>,
+) {
     let shader_id = gl_res.get_shader_gl_id("text_shader");
     gl::UseProgram(shader_id);
     let vertex_arr = gl_res.get_vertex_array_gl_id("position_and_texture");
     gl::BindVertexArray(vertex_arr);
     gl::ActiveTexture(gl::TEXTURE0);
 
-    gl_res.set_uniform_vec3f("text_color", "text_shader", Vector3::new(0.7, 0.3, 0.1));
+    gl_res.set_uniform_vec4f("text_color", "text_shader", color);
 
     let mut max_glyph_height = 0.0;
     let mut text_x = pos.0; // in pixels

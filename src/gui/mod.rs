@@ -3,13 +3,15 @@ use std::any::Any;
 //use core::option::Option;
 use crate::gui::MetaType::{Compound, Single};
 use crate::GlData;
-use mat_vec::Vector3;
+use mat_vec::{Vector3, Vector4};
 
 pub use label::Label;
 pub use root::RootGIE;
 
 pub mod label;
 pub mod root;
+
+static DEFAULT_TEXT_COLOR: Vector4<f32> = Vector4::new(0.7, 0.3, 0.1, 1.0);
 
 pub struct GieBase {
     pos: Vector3<i32>,

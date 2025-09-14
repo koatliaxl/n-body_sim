@@ -1,12 +1,16 @@
 use super::{GieBase, GIE};
+use crate::gui::DEFAULT_TEXT_COLOR;
 use crate::GlData;
+use core::option::Option;
+use mat_vec::{Vector3, Vector4};
 use std::any::Any;
 
 pub struct Label {
     base: GieBase,
     text: String,
     text_size: f32,
-    draw_function: unsafe fn(gl_res: &GlData, text: &str, pos: (i32, i32), scale: f32),
+    color: Option<Vector4<f32>>,
+    draw_function: unsafe fn(&GlData, &str, (i32, i32), f32, Vector4<f32>),
 }
 
 impl Label {
@@ -15,13 +19,20 @@ impl Label {
         name: String,
         text: &str,
         text_size: f32,
-        draw_function: unsafe fn(gl_res: &GlData, text: &str, pos: (i32, i32), scale: f32),
+        draw_function: unsafe fn(
+            gl_res: &GlData,
+            text: &str,
+            pos: (i32, i32),
+            scale: f32,
+            color: Vector4<f32>,
+        ),
     ) -> Label {
         let base = GieBase::new(pos, name, false);
         Label {
             base,
             text: text.to_string(),
             text_size,
+            color: None,
             draw_function,
         }
     }
@@ -32,6 +43,15 @@ impl Label {
 
     pub fn get_text(&self) -> &str {
         &self.text
+    }
+
+    pub fn set_color(&mut self, color: Vector3<f32>) {
+        self.color = Some(Vector4::from(color))
+    }
+
+    // Will use default color
+    pub fn reset_color(&mut self) {
+        self.color = None
     }
 }
 
@@ -44,6 +64,11 @@ impl GIE for Label {
                     &self.text,
                     (base.pos.x(), base.pos.y()),
                     self.text_size,
+                    if let Some(color) = self.color {
+                        color
+                    } else {
+                        DEFAULT_TEXT_COLOR
+                    },
                 )
             }
         }
